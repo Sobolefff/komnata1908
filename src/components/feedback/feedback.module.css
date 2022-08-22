@@ -1,0 +1,24 @@
+.feedback {
+    width: 100%;
+    min-height: 889px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(../../images/feedbackbg.jpg);
+}
+
+@media (max-width: 1440px) {
+    .feedback {
+        min-height: 57.6vw;
+    }
+}
+@media (max-width: 550px) {
+    .feedback {
+        min-height: 448px;
+        background-size: cover;
+    }
+}
