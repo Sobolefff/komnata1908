@@ -94,6 +94,11 @@
     line-height: 29px;
     color: #F8F8F8;
     cursor: pointer;
+    transition: all ease 0.2s;
+}
+
+.submitButton:hover {
+    background-color: rgba(53, 53, 53, 1);
 }
 
 .guests {

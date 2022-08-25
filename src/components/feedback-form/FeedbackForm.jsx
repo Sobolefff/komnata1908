@@ -49,7 +49,7 @@ export default function FeedbackForm() {
             chat_id: CHAT_ID,
             parse_mode: 'html',
             text: message,
-            disable_notification: true,
+            disable_notification: false,
         })
         .then((res) =>{
             navigate('/thanks');
@@ -108,7 +108,7 @@ export default function FeedbackForm() {
                                 name="tel" 
                                 pattern='^\s*([-+]*[0-9]*(?:[.,][0-9]+)?)\s*$' 
                                 minLength="7" 
-                                maxLength="11" 
+                                maxLength="12" 
                                 placeholder="Телефон" 
                                 value={state.tel} 
                                 onChange={(e) => setState({...state, tel: e.target.value})} 
