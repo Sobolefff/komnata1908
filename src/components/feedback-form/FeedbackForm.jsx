@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './feedbackForm.module.css';
 import moment from 'moment';
 import axios from 'axios';
@@ -11,26 +11,39 @@ import userPath from '../../images/icons/user.png';
 export default function FeedbackForm() {
     const navigate = useNavigate();
     const maxInterval = moment().add(21, 'd').format('YYYY-MM-DD');
-
     const getToWeekend = () => {
         let weekend = Number(moment().format("d"));
         let sum = 0;
         if(weekend < 5) {
             sum = 5 - weekend;
             return weekend = moment().add(sum, 'd').format('YYYY-MM-DD')
-        } else return moment().format('YYYY-MM-DD');
-    } 
-
-    const [state, setState] = useState({
-        name: '',
-        tel: '',
+        } else return weekend = moment().format('YYYY-MM-DD');
+    }
+    
+    const [options, setOptions] = useState({
         date: getToWeekend(),
         time: '20:00',
         guests: '1'
     });
-    const dayOfWeek = moment(state.date).format("dddd");
 
+    const [name, setName] = useState('');
+    const [tel, setTel] = useState('');
+    const [nameDirty, setNameDirty] = useState(false);
+    const [telDirty, setTelDirty] = useState(false);
+    const [nameError, setNameError] = useState('Заполните имя');
+    const [telError, setTelError] = useState('Заполните телефон');
+    const [formValid, setFormValid] = useState(false);
+    const [dateError, setDateError] = useState('');
+
+    useEffect(() => {
+        (nameError || telError || dateError) ? setFormValid(false) : setFormValid(true);
+    }, [nameError, telError, dateError])
     
+    const handlerDate = (e) => {
+        setOptions({...options, date: e.target.value});
+        const dayOfWeek = String(moment(e.target.value).format("dddd"));
+        (dayOfWeek != 'Friday' && dayOfWeek != 'Saturday') ? setDateError('Принимаем бронь только на пятницу и субботу') : setDateError('');
+    }
 
     const handlerFormSubmit = (e) => {
         e.preventDefault();
@@ -39,11 +52,11 @@ export default function FeedbackForm() {
         const URL_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
 
         let message = `<b><i>Заявка с сайта:</i></b>\n\n`;
-        message += `Отправитель: <b>${state.name}</b>\n`;
-        message += `Телефон: <b>${state.tel}</b>\n`;
-        message += `Желаемая дата: <b>${state.date}</b>\n`;
-        message += `Желаемое время: <b>${state.time}</b>\n`;
-        message += `Количество гостей: <b>${state.guests}</b>\n`;
+        message += `Отправитель: <b>${name}</b>\n`;
+        message += `Телефон: <b>${tel}</b>\n`;
+        message += `Желаемая дата: <b>${options.date}</b>\n`;
+        message += `Желаемое время: <b>${options.time}</b>\n`;
+        message += `Количество гостей: <b>${options.guests}</b>\n`;
 
         axios.post(URL_API, {
             chat_id: CHAT_ID,
@@ -61,9 +74,7 @@ export default function FeedbackForm() {
             console.log('End');
         });
 
-        setState({
-            name: '',
-            tel: '',
+        setOptions({
             date: getToWeekend(),
             time: '',
             guests: '1'
@@ -71,7 +82,7 @@ export default function FeedbackForm() {
     }
 
     const handlerGuestText = () => {
-        if(state.guests === '1') {
+        if(options.guests === '1') {
            return (
             <p className={styles.text}>гость</p>
            );
@@ -82,40 +93,63 @@ export default function FeedbackForm() {
         }
     }
     
+    const blurHandler = (e) => {
+        switch (e.target.name) {
+            case 'name':
+                setNameDirty(true)
+                break
+            case 'tel':
+                setTelDirty(true)
+                break
+        }
+    }
+
+    const nameHandler = (e) => {
+        setName(e.target.value);
+        const re = /^[а-яА-ЯёЁa-zA-Z'`'\-\s]{2,20}$/;
+        if (!re.test(String(e.target.value))) {
+            setNameError('Введите корректное имя от 2 до 20 символов');
+        } else {
+            setNameError('');
+        }
+    }
+
+    const telHandler = (e) => {
+        setTel(e.target.value);
+        const re = /^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/;
+        !re.test(String(e.target.value)) ? setTelError('Введите корректный номер телефона') : setTelError('');
+    }
 
     return (
         <Feedback>
             <form onSubmit={handlerFormSubmit} id="feedback-form" name="avatar-save" className={styles.form}>
                     <fieldset className={styles.inputContainer}>
-                        <label>
+                        <label className={styles.textLabel}>
                             <input 
+                                autocomplete="off"
                                 id="add-name" 
                                 type="text" 
                                 name="name" 
-                                minLength="2" 
-                                maxLength="25"
                                 placeholder="Имя" 
-                                value={state.name} 
-                                onChange={(e) => setState({...state, name: e.target.value})} 
-                                className={styles.textInput} 
-                                required 
+                                value={name} 
+                                onChange={e => nameHandler(e)}
+                                onBlur={e => blurHandler(e)}
+                                className={styles.textInput}
                             />
-                            <span className="form__error" id="add-name-error"></span>
+                            {(nameDirty && nameError) && <span className={styles.error}>{nameError}</span>}
                         </label>
-                        <label>
+                        <label className={styles.textLabel}>
                             <input 
+                                autocomplete="off"
                                 type="tel" 
                                 name="tel" 
-                                pattern='^\s*([-+]*[0-9]*(?:[.,][0-9]+)?)\s*$' 
-                                minLength="7" 
-                                maxLength="12" 
                                 placeholder="Телефон" 
-                                value={state.tel} 
-                                onChange={(e) => setState({...state, tel: e.target.value})} 
-                                className={styles.textInput} 
-                                required 
+                                value={tel} 
+                                onChange={e => telHandler(e)}
+                                onBlur={e => blurHandler(e)}
+                                className={styles.textInput}  
                             />
-                            <span className="form__error" id="add-tel-error"></span>
+                            {(telDirty && telError) && <span className={styles.error}>{telError}</span>}
                         </label>
                     </fieldset>
                     <fieldset className={styles.optionsContainer}>
@@ -125,12 +159,12 @@ export default function FeedbackForm() {
                                 min={getToWeekend()} 
                                 max={maxInterval} 
                                 type="date" 
-                                value={state.date} 
-                                onChange={(e) => setState({...state, date: e.target.value})} 
+                                value={options.date} 
+                                onChange={(e) => handlerDate(e)} 
                                 className={styles.optionsInput} 
                                 required
                             />
-                            { dayOfWeek == 'Friday' || dayOfWeek == 'Saturday' ? <></> : <span className={styles.error}>Принимаем бронь только на пятницу и субботу</span> }
+                            { dateError && <span className={styles.errorDate}>{dateError}</span> }
                         </label>
                         <label className={styles.inputLabel}>
                             <img src={clockPath} alt="иконка часов"/>
@@ -138,14 +172,14 @@ export default function FeedbackForm() {
                                 type="time" 
                                 min="20:00" 
                                 max="02:00" 
-                                value={state.time} 
-                                onChange={(e) => setState({...state, time: e.target.value})} 
+                                value={options.time} 
+                                onChange={(e) => setOptions({...options, time: e.target.value})} 
                                 className={styles.optionsInput} 
                                 required 
                             />
                         </label>
                         <label className={styles.guests}><img src={userPath} alt="иконка гостя"/>
-                            <select id="guests" value={state.guests} onChange={(e) => setState({...state, guests: e.target.value})} className={styles.optionsInput}>
+                            <select id="guests" value={options.guests} onChange={(e) => setOptions({...options, guests: e.target.value})} className={styles.optionsInput}>
                                 <option className={styles.optionsBox} value="1">1</option>
                                 <option className={styles.optionsBox} value="2">2</option>
                                 <option className={styles.optionsBox} value="3">3</option>
@@ -155,7 +189,7 @@ export default function FeedbackForm() {
                         </label>
                     </fieldset>
                     <fieldset className={styles.submitContainer}>
-                        <button id="form-submit" type="submit" className={styles.submitButton}>Оставить заявку</button>
+                        <button disabled={!formValid} id="form-submit" type="submit" className={styles.submitButton}>Оставить заявку</button>
                     </fieldset>
             </form>
         </Feedback>
