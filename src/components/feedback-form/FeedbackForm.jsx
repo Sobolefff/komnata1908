@@ -9,6 +9,7 @@ import clockPath from '../../images/icons/clock.png';
 import userPath from '../../images/icons/user.png';
 
 export default function FeedbackForm() {
+
     const navigate = useNavigate();
     const maxInterval = moment().add(21, 'd').format('YYYY-MM-DD');
     const getToWeekend = () => {
@@ -44,7 +45,7 @@ export default function FeedbackForm() {
     const handlerDate = (e) => {
         setOptions({...options, date: e.target.value});
         const dayOfWeek = String(moment(e.target.value).format("dddd"));
-        (dayOfWeek != 'Friday' && dayOfWeek != 'Saturday') ? setDateError('Принимаем бронь только на пятницу и субботу') : setDateError('');
+        (dayOfWeek !== 'Friday' && dayOfWeek !== 'Saturday') ? setDateError('Принимаем бронь только на пятницу и субботу') : setDateError('');
     }
 
     const handlerFormSubmit = (e) => {
@@ -62,7 +63,13 @@ export default function FeedbackForm() {
         message += `Желаемая дата: <b>${options.date}</b>\n`;
         message += `Желаемое время: <b>${options.time}</b>\n`;
         message += `Количество гостей: <b>${options.guests}</b>\n`;
-
+        const sheetUrl = 'https://script.google.com/macros/s/AKfycbzZVbb4WWi1NBKlRopRsIZMpt3cE51wnPz6B_RmdZRON2dK63imOeVSZH6eGFoK8u7D/exec';
+        const sheetApi = () => {
+            fetch(sheetUrl, {
+                method: 'POST',
+                body: new FormData(e.target)
+            })
+        }
         axios.post(URL_API, {
             chat_id: CHAT_ID,
             parse_mode: 'html',
@@ -72,6 +79,7 @@ export default function FeedbackForm() {
         .then((res) =>{
             navigate('/thanks');
             setButtonText('Оставить заявку');
+            sheetApi();
         })
         .catch((err) => {
             console.warn(err);
@@ -82,11 +90,11 @@ export default function FeedbackForm() {
 
         setOptions({
             date: getToWeekend(),
-            time: '',
+            time: '20:00',
             guests: '1'
         });
-        setName('');
-        setTel('');
+        // setName('');
+        // setTel('');
     }
 
     const handlerGuestText = () => {
@@ -103,12 +111,15 @@ export default function FeedbackForm() {
     
     const blurHandler = (e) => {
         switch (e.target.name) {
-            case 'name':
+            case 'Name':
                 setNameDirty(true)
                 break
-            case 'tel':
+            case 'Tel':
                 setTelDirty(true)
                 break
+            default: 
+                setNameDirty(false)
+                setTelDirty(false)
         }
     }
 
@@ -124,7 +135,7 @@ export default function FeedbackForm() {
 
     const telHandler = (e) => {
         setTel(e.target.value);
-        const re = /^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/;
+        const re = /^((8|\+7)[\-]?)?(\(?\d{3}\)?[\-]?)?[\d\-]{7,10}$/;
         !re.test(String(e.target.value)) ? setTelError('Введите корректный номер телефона') : setTelError('');
     }
 
@@ -134,10 +145,10 @@ export default function FeedbackForm() {
                     <fieldset className={styles.inputContainer}>
                         <label className={styles.textLabel}>
                             <input 
-                                autocomplete="off"
+                                autoComplete="off"
                                 id="add-name" 
                                 type="text" 
-                                name="name" 
+                                name="Name" 
                                 placeholder="Имя" 
                                 value={name} 
                                 onChange={e => nameHandler(e)}
@@ -148,9 +159,9 @@ export default function FeedbackForm() {
                         </label>
                         <label className={styles.textLabel}>
                             <input 
-                                autocomplete="off"
+                                autoComplete="off"
                                 type="tel" 
-                                name="tel" 
+                                name="Tel" 
                                 placeholder="Телефон" 
                                 value={tel} 
                                 onChange={e => telHandler(e)}
