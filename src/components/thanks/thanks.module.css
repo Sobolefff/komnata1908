@@ -9,6 +9,7 @@
     position: relative;
     padding: 152px 108px;
     box-sizing: border-box;
+    position: relative;
 }
 
 .title {
@@ -44,6 +45,20 @@
     text-align: center;
     color: #F8F8F8;
     margin: 0;
+}
+
+.close {
+    background-image: url(../../images/icons/cross.png);
+    width: 24px;
+    height: 24px;
+    border: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
 }
 
 @media (max-width: 1280px) {

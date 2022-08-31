@@ -34,6 +34,8 @@ export default function FeedbackForm() {
     const [telError, setTelError] = useState('Заполните телефон');
     const [formValid, setFormValid] = useState(false);
     const [dateError, setDateError] = useState('');
+    const [buttonText, setButtonText] = useState('Оставить заявку');
+
 
     useEffect(() => {
         (nameError || telError || dateError) ? setFormValid(false) : setFormValid(true);
@@ -47,6 +49,9 @@ export default function FeedbackForm() {
 
     const handlerFormSubmit = (e) => {
         e.preventDefault();
+        setFormValid(false);
+        setButtonText('Отправка...');
+        
         const TOKEN = '5418369687:AAHCMy9pCFT7S1-BDWexPZZW1YS11CPd1I8';
         const CHAT_ID = '-1001736786651';
         const URL_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
@@ -66,6 +71,7 @@ export default function FeedbackForm() {
         })
         .then((res) =>{
             navigate('/thanks');
+            setButtonText('Оставить заявку');
         })
         .catch((err) => {
             console.warn(err);
@@ -79,6 +85,8 @@ export default function FeedbackForm() {
             time: '',
             guests: '1'
         });
+        setName('');
+        setTel('');
     }
 
     const handlerGuestText = () => {
@@ -189,7 +197,7 @@ export default function FeedbackForm() {
                         </label>
                     </fieldset>
                     <fieldset className={styles.submitContainer}>
-                        <button disabled={!formValid} id="form-submit" type="submit" className={styles.submitButton}>Оставить заявку</button>
+                        <button disabled={!formValid} id="form-submit" type="submit" className={styles.submitButton}>{buttonText}</button>
                     </fieldset>
             </form>
         </Feedback>
