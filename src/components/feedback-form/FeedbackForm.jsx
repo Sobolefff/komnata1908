@@ -83,7 +83,7 @@ export default function FeedbackForm() {
             chat_id: CHAT_ID,
             parse_mode: 'html',
             text: message,
-            disable_notification: true,
+            disable_notification: false,
         })
         .then((res) =>{
             navigate('/thanks');
