@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './feedbackForm.module.css';
 import moment from 'moment';
 import axios from 'axios';
@@ -7,9 +7,16 @@ import { useNavigate } from 'react-router-dom';
 import calendarPath from '../../images/icons/calendar.png';
 import clockPath from '../../images/icons/clock.png';
 import userPath from '../../images/icons/user.png';
+import { data } from '../../utils/times';
+
 
 export default function FeedbackForm() {
-
+    const refTime = useRef();
+    const refGuests = useRef();
+    const timesArr = data.filter((el) => el.type === "time");
+    const times = Array.from(timesArr);
+    const guestsArr = data.filter((el) => el.type === "guest_vol");
+    const guests = Array.from(guestsArr);
     const navigate = useNavigate();
     const maxInterval = moment().add(21, 'd').format('YYYY-MM-DD');
     const getToWeekend = () => {
@@ -36,6 +43,8 @@ export default function FeedbackForm() {
     const [formValid, setFormValid] = useState(false);
     const [dateError, setDateError] = useState('');
     const [buttonText, setButtonText] = useState('Оставить заявку');
+    const [showDropDown, setShowDropDown] = useState(false);
+    const [showDropDownGuests, setShowDropDownGuests] = useState(false);
 
 
     useEffect(() => {
@@ -67,19 +76,18 @@ export default function FeedbackForm() {
         const sheetApi = () => {
             fetch(sheetUrl, {
                 method: 'POST',
-                body: new FormData(e.target)
-            })
+                body: new FormData(e.target)})
         }
+        sheetApi();
         axios.post(URL_API, {
             chat_id: CHAT_ID,
             parse_mode: 'html',
             text: message,
-            disable_notification: false,
+            disable_notification: true,
         })
         .then((res) =>{
             navigate('/thanks');
             setButtonText('Оставить заявку');
-            sheetApi();
         })
         .catch((err) => {
             console.warn(err);
@@ -139,6 +147,44 @@ export default function FeedbackForm() {
         !re.test(String(e.target.value)) ? setTelError('Введите корректный номер телефона') : setTelError('');
     }
 
+    const dropDownHandler = (e) => {
+        e.preventDefault();
+        setShowDropDown(!showDropDown);
+    }
+    const dropDownGuestsHandler = (e) => {
+        e.preventDefault();
+        setShowDropDownGuests(!showDropDownGuests);
+    }
+
+    const timeHandler = (e) => {
+        setOptions({...options, time: e.target.dataset.value});
+    }
+    const guestsHandler = (e) => {
+        setOptions({...options, guests: e.target.dataset.value});
+    }
+
+    
+
+    function useOnClickOutside(ref, handler) {
+        useEffect(
+            () => {
+                const listener = (event) => {
+                    if (!ref.current || ref.current.contains(event.target)) {
+                        return;
+                }
+                    handler(event);
+                };
+                document.addEventListener("mousedown", listener);
+                document.addEventListener("touchstart", listener);
+                return () => {
+                    document.removeEventListener("mousedown", listener);
+                    document.removeEventListener("touchstart", listener);
+                };
+            }, [ref, handler]);
+    }
+    useOnClickOutside(refTime, (e) => setShowDropDown(false));
+    useOnClickOutside(refGuests, (e) => setShowDropDownGuests(false));
+
     return (
         <Feedback>
             <form onSubmit={handlerFormSubmit} id="feedback-form" name="avatar-save" className={styles.form}>
@@ -186,25 +232,47 @@ export default function FeedbackForm() {
                             { dateError && <span className={styles.errorDate}>{dateError}</span> }
                         </label>
                         <label className={styles.inputLabel}>
-                            <img src={clockPath} alt="иконка часов"/>
-                            <input 
-                                type="time" 
-                                min="20:00" 
-                                max="02:00" 
-                                value={options.time} 
-                                onChange={(e) => setOptions({...options, time: e.target.value})} 
-                                className={styles.optionsInput} 
-                                required 
-                            />
+                            <img src={clockPath} alt="иконка часов" className={styles.icon}/>
+                            <div className={styles.dropDown} ref={refTime}>
+                                <button type='button' onClick={dropDownHandler} className={styles.dropDownButton}>{options.time}</button>
+                                {showDropDown && 
+                                    <ul className={styles.dropDownList}>
+                                        {times.map((times) => (<li onClick={e => timeHandler(e)} className={styles.dropDownItem} data-value={times.time} key={times.id}>{times.time}</li>))}
+                                    </ul>
+                                }
+                                <input 
+                                    type="text"
+                                    name="Time"
+                                    value={options.time}
+                                    onChange={(e) => setOptions({...options, time: e.target.value})}
+                                    className={styles.hiddenInput}
+                                />                          
+                            </div>
+
                         </label>
-                        <label className={styles.guests}><img src={userPath} alt="иконка гостя"/>
-                            <select id="guests" value={options.guests} onChange={(e) => setOptions({...options, guests: e.target.value})} className={styles.optionsInput}>
+                        <label className={styles.guests}><img src={userPath} alt="иконка гостя" className={styles.icon}/>
+                            {/* <select id="guests" value={options.guests} onChange={(e) => setOptions({...options, guests: e.target.value})} className={styles.optionsInput}>
                                 <option className={styles.optionsBox} value="1">1</option>
                                 <option className={styles.optionsBox} value="2">2</option>
                                 <option className={styles.optionsBox} value="3">3</option>
                                 <option className={styles.optionsBox} value="4">4</option>
-                            </select>
-                            {handlerGuestText()}
+                            </select> */}
+                            <div className={styles.dropDown} ref={refGuests}>
+                                <button type='button' onClick={dropDownGuestsHandler} className={styles.dropDownButton}>{options.guests}{handlerGuestText()}</button>
+                                {showDropDownGuests && 
+                                    <ul className={styles.dropDownList}>
+                                        {guests.map((guests) => (<li onClick={e => guestsHandler(e)} className={styles.dropDownItem} data-value={guests.guests} key={guests.id}>{guests.guests}</li>))}
+                                    </ul>
+                                }
+                                <input 
+                                    type="text"
+                                    name="Guests"
+                                    value={options.guests}
+                                    onChange={(e) => setOptions({...options, guests: e.target.value})}
+                                    className={styles.hiddenInput}
+                                />                     
+                            </div>
+                            
                         </label>
                     </fieldset>
                     <fieldset className={styles.submitContainer}>
