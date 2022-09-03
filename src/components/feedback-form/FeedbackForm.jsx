@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './feedbackForm.module.css';
 import moment from 'moment';
+import 'moment/locale/ru';
 import axios from 'axios';
 import { Feedback } from '../feedback/Feedback';
 import { useNavigate } from 'react-router-dom';
@@ -46,7 +47,6 @@ export default function FeedbackForm() {
     const [showDropDown, setShowDropDown] = useState(false);
     const [showDropDownGuests, setShowDropDownGuests] = useState(false);
 
-
     useEffect(() => {
         (nameError || telError || dateError) ? setFormValid(false) : setFormValid(true);
     }, [nameError, telError, dateError])
@@ -54,7 +54,9 @@ export default function FeedbackForm() {
     const handlerDate = (e) => {
         setOptions({...options, date: e.target.value});
         const dayOfWeek = String(moment(e.target.value).format("dddd"));
-        (dayOfWeek !== 'Friday' && dayOfWeek !== 'Saturday') ? setDateError('Принимаем бронь только на пятницу и субботу') : setDateError('');
+        const closeDay = String(moment(e.target.value).format("YYYY-MM-DD"));
+        (dayOfWeek != 'пятница' && dayOfWeek != 'суббота') ? setDateError('Принимаем бронь только на пятницу и субботу') : 
+        (closeDay == '2022-09-09') ? setDateError('К сожалению, все места заняты') : setDateError('');
     }
 
     const handlerFormSubmit = (e) => {
@@ -69,7 +71,7 @@ export default function FeedbackForm() {
         let message = `<b><i>Заявка с сайта:</i></b>\n\n`;
         message += `Отправитель: <b>${name}</b>\n`;
         message += `Телефон: <b>${tel}</b>\n`;
-        message += `Желаемая дата: <b>${options.date}</b>\n`;
+        message += `Желаемая дата: <b>${moment(options.date).format('ddd DD.MM.YYYY')}</b>\n`;
         message += `Желаемое время: <b>${options.time}</b>\n`;
         message += `Количество гостей: <b>${options.guests}</b>\n`;
         const sheetUrl = 'https://script.google.com/macros/s/AKfycbzZVbb4WWi1NBKlRopRsIZMpt3cE51wnPz6B_RmdZRON2dK63imOeVSZH6eGFoK8u7D/exec';
