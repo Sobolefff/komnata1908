@@ -25,7 +25,7 @@ export default function FeedbackForm() {
         let sum = 0;
         if(weekend < 5) {
             sum = 5 - weekend;
-            return weekend = moment().add(sum, 'd').format('YYYY-MM-DD')
+            return weekend = moment().add(sum, 'd').format('YYYY-MM-DD');
         } else return weekend = moment().format('YYYY-MM-DD');
     }
     
@@ -34,6 +34,7 @@ export default function FeedbackForm() {
         time: '20:00',
         guests: '1'
     });
+    
 
     const [name, setName] = useState('');
     const [tel, setTel] = useState('');
@@ -46,19 +47,25 @@ export default function FeedbackForm() {
     const [buttonText, setButtonText] = useState('Оставить заявку');
     const [showDropDown, setShowDropDown] = useState(false);
     const [showDropDownGuests, setShowDropDownGuests] = useState(false);
-
+    
     useEffect(() => {
         (nameError || telError || dateError) ? setFormValid(false) : setFormValid(true);
-    }, [nameError, telError, dateError])
+    }, [nameError, telError, dateError]);
+
+    const closeDayHandler = () => {
+        const dayOfWeek = String(moment(options.date).format("dddd"));
+        options.date === '2022-09-09' ? setDateError('К сожалению, все места заняты') : 
+        (dayOfWeek !== 'пятница' && dayOfWeek !== 'суббота') ? setDateError('Принимаем бронь только на пятницу и субботу') : setDateError('');
+    }
+
+    useEffect(() => {
+        closeDayHandler();
+    }, [options.date]);
+
     
     const handlerDate = (e) => {
         setOptions({...options, date: e.target.value});
-        const dayOfWeek = String(moment(e.target.value).format("dddd"));
-        const closeDay = String(moment(e.target.value).format("YYYY-MM-DD"));
-        (dayOfWeek != 'пятница' && dayOfWeek != 'суббота') ? setDateError('Принимаем бронь только на пятницу и субботу') : 
-        (closeDay == '2022-09-09') ? setDateError('К сожалению, все места заняты') : setDateError('');
     }
-
     const handlerFormSubmit = (e) => {
         e.preventDefault();
         setFormValid(false);
@@ -148,7 +155,6 @@ export default function FeedbackForm() {
         const re = /^((8|\+7)[\-]?)?(\(?\d{3}\)?[\-]?)?[\d\-]{7,10}$/;
         !re.test(String(e.target.value)) ? setTelError('Введите корректный номер телефона') : setTelError('');
     }
-
     const dropDownHandler = (e) => {
         e.preventDefault();
         setShowDropDown(!showDropDown);
@@ -186,7 +192,6 @@ export default function FeedbackForm() {
     }
     useOnClickOutside(refTime, (e) => setShowDropDown(false));
     useOnClickOutside(refGuests, (e) => setShowDropDownGuests(false));
-
     return (
         <Feedback>
             <form onSubmit={handlerFormSubmit} id="feedback-form" name="avatar-save" className={styles.form}>
