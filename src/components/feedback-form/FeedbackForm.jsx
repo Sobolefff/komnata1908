@@ -70,6 +70,7 @@ export default function FeedbackForm() {
     
     const handlerDate = (e) => {
         setOptions({...options, date: e.target.value});
+        e.target.setCustomValidity('Вы можете забронировать место на ближайшую пятницу или субботу');
     }
     const handlerFormSubmit = (e) => {
         e.preventDefault();
