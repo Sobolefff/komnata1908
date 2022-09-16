@@ -9,9 +9,13 @@ import calendarPath from '../../images/icons/calendar.png';
 import clockPath from '../../images/icons/clock.png';
 import userPath from '../../images/icons/user.png';
 import { data } from '../../utils/times';
+import { Utm } from 'utm-extractor';
 
 
 export default function FeedbackForm() {
+    const url = document.location.href.split('#')[0];
+    const utm = new Utm(url);
+    const utmValues = utm.get();
     const refTime = useRef();
     const refGuests = useRef();
     const timesArr = data.filter((el) => el.type === "time");
@@ -76,11 +80,20 @@ export default function FeedbackForm() {
         const URL_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
 
         let message = `<b><i>Заявка с сайта:</i></b>\n\n`;
+        message += `<i>Основная информация:</i>\n`;
         message += `Отправитель: <b>${name}</b>\n`;
         message += `Телефон: <b>${tel}</b>\n`;
         message += `Желаемая дата: <b>${moment(options.date).format('ddd DD.MM.YYYY')}</b>\n`;
         message += `Желаемое время: <b>${options.time}</b>\n`;
-        message += `Количество гостей: <b>${options.guests}</b>\n`;
+        message += `Количество гостей: <b>${options.guests}</b>\n\n`;
+        if ((new URL(url)).search) {
+            message += `<i>Дополнительная информация:</i>\n`;
+            message += `UTM source: <b>${utmValues.utm_source}</b>\n`;
+            message += `UTM medium: <b>${utmValues.utm_medium}</b>\n`;
+            message += `UTM campaign: <b>${utmValues.utm_campaign}</b>\n`;
+            message += `UTM content: <b>${utmValues.utm_content}</b>\n`;
+            message += `UTM term: <b>${utmValues.utm_term}</b>\n`;
+        }
         const sheetUrl = 'https://script.google.com/macros/s/AKfycbzZVbb4WWi1NBKlRopRsIZMpt3cE51wnPz6B_RmdZRON2dK63imOeVSZH6eGFoK8u7D/exec';
         const sheetApi = () => {
             fetch(sheetUrl, {
@@ -110,8 +123,6 @@ export default function FeedbackForm() {
             time: '20:00',
             guests: '1'
         });
-        // setName('');
-        // setTel('');
     }
 
     const handlerGuestText = () => {
