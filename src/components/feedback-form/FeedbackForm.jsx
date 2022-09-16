@@ -243,7 +243,8 @@ export default function FeedbackForm() {
                             <input 
                                 min={getToWeekend()} 
                                 max={maxInterval} 
-                                type="date" 
+                                type="date"
+                                name="Data"
                                 value={options.date} 
                                 onChange={(e) => handlerDate(e)} 
                                 className={styles.optionsInput} 
@@ -271,12 +272,6 @@ export default function FeedbackForm() {
 
                         </label>
                         <label className={styles.guests}><img src={userPath} alt="иконка гостя" className={styles.icon}/>
-                            {/* <select id="guests" value={options.guests} onChange={(e) => setOptions({...options, guests: e.target.value})} className={styles.optionsInput}>
-                                <option className={styles.optionsBox} value="1">1</option>
-                                <option className={styles.optionsBox} value="2">2</option>
-                                <option className={styles.optionsBox} value="3">3</option>
-                                <option className={styles.optionsBox} value="4">4</option>
-                            </select> */}
                             <div className={styles.dropDown} ref={refGuests}>
                                 <button type='button' onClick={dropDownGuestsHandler} className={styles.dropDownButton}>{options.guests}{handlerGuestText()}</button>
                                 {showDropDownGuests && 
