@@ -12,7 +12,7 @@ export default function Footer() {
                 <li className={styles.icon}><a href="https://t.me/komnata1908" target="blank"><img src={tgPath} alt="" /></a></li>
                 <li className={styles.icon}><a href="whatsapp://send?phone=79650726145" target="blank"><img src={waPath} alt="" /></a></li>
             </ul>
-            <copyright className={styles.copyright}>© 2022. Komnata 1908. ВСЕ ПРАВА ЗАЩИЩЕНЫ</copyright>
+            <p className={styles.copyright}>© 2022. Komnata 1908. ВСЕ ПРАВА ЗАЩИЩЕНЫ</p>
         </footer>
     )
 }

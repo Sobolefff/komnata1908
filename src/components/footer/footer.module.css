@@ -30,6 +30,8 @@
 }
 
 .copyright {
+    margin: 0;
+    padding: 0;
     margin-top: 55px;
     font-family: 'Montserrat';
     font-style: normal;

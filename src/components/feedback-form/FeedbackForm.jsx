@@ -32,7 +32,6 @@ export default function FeedbackForm() {
             return weekend = moment().add(sum, 'd').format('YYYY-MM-DD');
         } else return weekend = moment().format('YYYY-MM-DD');
     }
-    const maxInterval = moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD');
     
     const [options, setOptions] = useState({
         date: getToWeekend(),
@@ -40,7 +39,7 @@ export default function FeedbackForm() {
         guests: '1'
     });
     
-
+    const [maxInterval, setMaxInterval] = useState(moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD'))
     const [name, setName] = useState('');
     const [tel, setTel] = useState('');
     const [nameDirty, setNameDirty] = useState(false);
@@ -55,12 +54,22 @@ export default function FeedbackForm() {
     
     useEffect(() => {
         (nameError || telError || dateError) ? setFormValid(false) : setFormValid(true);
-    }, [nameError, telError, dateError]);
-
+    }, [nameError, telError, dateError]);;
+    
     const closeDayHandler = () => {
-        const dayOfWeek = String(moment(options.date).format("dddd"));
-        options.date === '2022-09-09' ? setDateError('К сожалению, все места заняты') : 
-        (dayOfWeek !== 'пятница' && dayOfWeek !== 'суббота') ? setDateError('Принимаем бронь только на пятницу и субботу') : setDateError('');
+        const dayOfWeek = moment(options.date);;
+        setMaxInterval(dayOfWeek.format('dddd') === 'суббота' ? dayOfWeek.format('YYYY-MM-DD') : moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD'))
+        options.date === '2022-09-09' 
+        ? setDateError('К сожалению, все места заняты') 
+        : (dayOfWeek.format("dddd") !== 'пятница' 
+            && dayOfWeek.format("dddd") !== 'суббота' 
+            && dayOfWeek.format("dddd") !== 'воскресенье') 
+            || dayOfWeek.format("M") !== moment(getToWeekend()).format('M') 
+            || dayOfWeek.format('D') < moment(getToWeekend()).format('D') 
+            || dayOfWeek.format('D') > moment(getToWeekend()).format('D') 
+            && dayOfWeek.format('D') > moment(getToWeekend()).add(1, 'd').format('D') 
+        ? setDateError('Принимаем бронь только на ближайшую пятницу и субботу') 
+        : setDateError('');
     }
 
     useEffect(() => {
