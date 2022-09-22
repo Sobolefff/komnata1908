@@ -85,46 +85,6 @@ export const data = [
         "type":"time",
     },
     {
-        "id":"18",
-        "time":"00:15",
-        "type":"time",
-    },
-    {
-        "id":"19",
-        "time":"00:30",
-        "type":"time",
-    },
-    {
-        "id":"20",
-        "time":"00:45",
-        "type":"time",
-    },
-    {
-        "id":"21",
-        "time":"01:00",
-        "type":"time",
-    },
-    {
-        "id":"22",
-        "time":"01:15",
-        "type":"time",
-    },
-    {
-        "id":"23",
-        "time":"01:30",
-        "type":"time",
-    },
-    {
-        "id":"24",
-        "time":"01:45",
-        "type":"time",
-    },
-    {
-        "id":"25",
-        "time":"02:00",
-        "type":"time",
-    },
-    {
         "id": "26",
         "guests":"1",
         "type":"guest_vol"

@@ -23,7 +23,7 @@ export default function FeedbackForm() {
     const guestsArr = data.filter((el) => el.type === "guest_vol");
     const guests = Array.from(guestsArr);
     const navigate = useNavigate();
-    const maxInterval = moment().add(21, 'd').format('YYYY-MM-DD');
+    
     const getToWeekend = () => {
         let weekend = Number(moment().format("d"));
         let sum = 0;
@@ -32,6 +32,7 @@ export default function FeedbackForm() {
             return weekend = moment().add(sum, 'd').format('YYYY-MM-DD');
         } else return weekend = moment().format('YYYY-MM-DD');
     }
+    const maxInterval = moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD');
     
     const [options, setOptions] = useState({
         date: getToWeekend(),
