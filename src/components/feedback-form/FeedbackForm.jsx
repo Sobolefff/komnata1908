@@ -125,6 +125,7 @@ export default function FeedbackForm() {
             console.warn(err);
         })
         .finally(() => {
+            window.ym(90093500,'reachGoal','form-submit');
             console.log('End');
         });
 
@@ -215,7 +216,7 @@ export default function FeedbackForm() {
     useOnClickOutside(refGuests, (e) => setShowDropDownGuests(false));
     return (
         <Feedback>
-            <form onSubmit={(e) => {handlerFormSubmit(e); window.ym(90093500,'reachGoal','form-submit')}} id="feedback-form" name="avatar-save" className={styles.form}>
+            <form onSubmit={handlerFormSubmit} id="feedback-form" name="avatar-save" className={styles.form}>
                     <fieldset className={styles.inputContainer}>
                         <label className={styles.textLabel}>
                             <input 
@@ -298,7 +299,7 @@ export default function FeedbackForm() {
                         </label>
                     </fieldset>
                     <fieldset className={styles.submitContainer}>
-                        <button disabled={!formValid} id="form-submit" type="submit" className={styles.submitButton}>{buttonText}</button>
+                        <button disabled={!formValid} onClick={() => window.ym(90093500,'reachGoal','submit-click')} id="form-submit" type="submit" className={styles.submitButton}>{buttonText}</button>
                     </fieldset>
             </form>
         </Feedback>
