@@ -79,7 +79,6 @@ export default function FeedbackForm() {
     
     const handlerDate = (e) => {
         setOptions({...options, date: e.target.value});
-        e.target.setCustomValidity('Вы можете забронировать место на ближайшую пятницу или субботу');
     }
     const handlerFormSubmit = (e) => {
         e.preventDefault();
@@ -216,7 +215,7 @@ export default function FeedbackForm() {
     useOnClickOutside(refGuests, (e) => setShowDropDownGuests(false));
     return (
         <Feedback>
-            <form onSubmit={handlerFormSubmit} id="feedback-form" name="avatar-save" className={styles.form}>
+            <form onSubmit={handlerFormSubmit} onsubmit="ym(90093500,'reachGoal','form-submit')" id="feedback-form" name="avatar-save" className={styles.form}>
                     <fieldset className={styles.inputContainer}>
                         <label className={styles.textLabel}>
                             <input 
@@ -256,8 +255,7 @@ export default function FeedbackForm() {
                                 name="Data"
                                 value={options.date} 
                                 onChange={(e) => handlerDate(e)} 
-                                className={styles.optionsInput} 
-                                required
+                                className={styles.optionsInput}
                             />
                             { dateError && <span className={styles.errorDate}>{dateError}</span> }
                         </label>
