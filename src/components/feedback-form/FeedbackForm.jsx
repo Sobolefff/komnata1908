@@ -54,6 +54,10 @@ export default function FeedbackForm() {
     
     useEffect(() => {
         (nameError || telError || dateError) ? setFormValid(false) : setFormValid(true);
+        if (!nameError && !telError) {
+            window.ym(90093500,'reachGoal','name');
+            window.ym(90093500,'reachGoal','tel');
+        }
     }, [nameError, telError, dateError]);;
     
     const closeDayHandler = () => {
@@ -126,7 +130,7 @@ export default function FeedbackForm() {
         })
         .finally(() => {
             window.ym(90093500,'reachGoal','form-submit');
-            console.log('End');
+            console.log('Success');
         });
 
         setOptions({
@@ -151,14 +155,14 @@ export default function FeedbackForm() {
     const blurHandler = (e) => {
         switch (e.target.name) {
             case 'Name':
-                setNameDirty(true)
-                break
+                setNameDirty(true);
+                break;
             case 'Tel':
-                setTelDirty(true)
-                break
+                setTelDirty(true);
+                break;
             default: 
-                setNameDirty(false)
-                setTelDirty(false)
+                setNameDirty(false);
+                setTelDirty(false);
         }
     }
 
@@ -169,14 +173,21 @@ export default function FeedbackForm() {
             setNameError('Введите корректное имя от 2 до 20 символов');
         } else {
             setNameError('');
+            
         }
     }
 
     const telHandler = (e) => {
         setTel(e.target.value);
         const re = /^((8|\+7)[\-]?)?(\(?\d{3}\)?[\-]?)?[\d\-]{7,10}$/;
-        !re.test(String(e.target.value)) ? setTelError('Введите корректный номер телефона') : setTelError('');
+        if (!re.test(String(e.target.value))) {
+            setTelError('Введите корректный номер телефона');
+        } else {
+            setTelError('');
+            
+        }
     }
+
     const dropDownHandler = (e) => {
         e.preventDefault();
         setShowDropDown(!showDropDown);
