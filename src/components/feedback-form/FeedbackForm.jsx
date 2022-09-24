@@ -55,8 +55,7 @@ export default function FeedbackForm() {
     useEffect(() => {
         (nameError || telError || dateError) ? setFormValid(false) : setFormValid(true);
         if (!nameError && !telError) {
-            window.ym(90093500,'reachGoal','name');
-            window.ym(90093500,'reachGoal','tel');
+            window.ym(90093500,'reachGoal','name-tel');
         }
     }, [nameError, telError, dateError]);;
     
