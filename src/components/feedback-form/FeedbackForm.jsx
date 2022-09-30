@@ -64,11 +64,11 @@ export default function FeedbackForm() {
         setMaxInterval(dayOfWeek.format('dddd') === 'суббота' ? dayOfWeek.format('YYYY-MM-DD') : moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD'))
         if (options.date === '2022-09-09') {
             setDateError('К сожалению, все места заняты');
-        } else if (dayOfWeek.format('X') < moment(getToWeekend()).format('X') || dayOfWeek.format('X') > moment(getToWeekend()).add(1, 'd').format('X')) {
+        } else if (dayOfWeek.format('X') < moment(getToWeekend()).format('X') || dayOfWeek.format('X') > moment(getToWeekend()).add(1, 'd').format('X') || (moment().format('dddd') === 'суббота' && dayOfWeek.format('X') > moment(getToWeekend()).format('X'))) {
             setDateError('Принимаем бронь только на ближайшую пятницу и субботу');
         } else setDateError('');
     }
-
+    console.log(moment().format('dddd'))
     useEffect(() => {
         closeDayHandler();
     }, [options.date]);
