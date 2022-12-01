@@ -93,7 +93,6 @@ export default function FeedbackForm() {
             );
         } else setDateError('');
     };
-    console.log(moment().format('dddd'));
     useEffect(() => {
         closeDayHandler();
     }, [options.date]);
