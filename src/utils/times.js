@@ -6,101 +6,51 @@ export const data = [
     },
     {
         "id":"2",
-        "time":"20:15",
-        "type":"time",
-    },
-    {
-        "id":"3",
         "time":"20:30",
         "type":"time",
     },
     {
-        "id":"4",
-        "time":"20:45",
-        "type":"time",
-    },
-    {
-        "id":"5",
+        "id":"3",
         "time":"21:00",
         "type":"time",
     },
     {
-        "id":"6",
-        "time":"21:15",
-        "type":"time",
-    },
-    {
-        "id":"7",
+        "id":"4",
         "time":"21:30",
         "type":"time",
     },
     {
-        "id":"8",
-        "time":"21:45",
-        "type":"time",
-    },
-    {
-        "id":"9",
+        "id":"5",
         "time":"22:00",
         "type":"time",
     },
     {
-        "id":"10",
-        "time":"22:15",
-        "type":"time",
-    },
-    {
-        "id":"11",
+        "id":"6",
         "time":"22:30",
         "type":"time",
     },
     {
-        "id":"12",
-        "time":"22:45",
-        "type":"time",
-    },
-    {
-        "id":"13",
+        "id":"7",
         "time":"23:00",
         "type":"time",
     },
     {
-        "id":"14",
-        "time":"23:15",
-        "type":"time",
-    },
-    {
-        "id":"15",
-        "time":"23:30",
-        "type":"time",
-    },
-    {
-        "id":"16",
-        "time":"23:45",
-        "type":"time",
-    },
-    {
-        "id":"17",
-        "time":"00:00",
-        "type":"time",
-    },
-    {
-        "id": "26",
+        "id": "8",
         "guests":"1",
         "type":"guest_vol"
     },
     {
-        "id": "27",
+        "id": "9",
         "guests":"2",
         "type":"guest_vol"
     },
     {
-        "id": "28",
+        "id": "10",
         "guests":"3",
         "type":"guest_vol"
     },
     {
-        "id": "29",
+        "id": "11",
         "guests":"4",
         "type":"guest_vol"
     },
