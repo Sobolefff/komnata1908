@@ -27,7 +27,7 @@ export default function FeedbackForm() {
         let weekend = Number(moment().format('d'));
         let sum = 0;
         if (weekend < 5) {
-            sum = 5 - weekend; // для открытия четверга - 4, для пт и сб - 5
+            sum = 4 - weekend; // для открытия четверга - 4, для пт и сб - 5
             return (weekend = moment().add(sum, 'd').format('YYYY-MM-DD'));
         } else return (weekend = moment().format('YYYY-MM-DD'));
     };
@@ -65,33 +65,34 @@ export default function FeedbackForm() {
     const closeDayHandler = () => {
         const dayOfWeek = moment(options.date);
         // чт/пт/сб или пт/сб
-        // setMaxInterval(
-        //     dayOfWeek.format('dddd') === 'суббота'
-        //         ? dayOfWeek.format('YYYY-MM-DD')
-        //         : dayOfWeek.format('dddd') === 'четверг'
-        //         ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-        //         : dayOfWeek.format('dddd') === 'пятница'
-        //         ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-        //         : moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD')
-        // );
         setMaxInterval(
             dayOfWeek.format('dddd') === 'суббота'
                 ? dayOfWeek.format('YYYY-MM-DD')
+                : dayOfWeek.format('dddd') === 'четверг'
+                ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
+                : dayOfWeek.format('dddd') === 'пятница'
+                ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
                 : moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD')
         );
+        // setMaxInterval(
+        //     dayOfWeek.format('dddd') === 'воскресение'
+        //         ? dayOfWeek.format('YYYY-MM-DD')
+        //         : moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
+        // );
         if (options.date === '2022-09-09') {
             setDateError('К сожалению, все места заняты');
         } else if (
             dayOfWeek.format('X') < moment(getToWeekend()).format('X') ||
             dayOfWeek.format('X') >
-                moment(getToWeekend()).add(1, 'd').format('X') ||
-            (moment().format('dddd') === 'суббота' &&
+                moment(getToWeekend()).add(2, 'd').format('X') ||
+            (moment().format('dddd') === 'воскресение' &&
                 dayOfWeek.format('X') > moment(getToWeekend()).format('X'))
         ) {
             setDateError(
-                'Принимаем бронь только на ближайшую пятницу и субботу'
+                'Принимаем бронь только на ближайшую пятницу, субботу и воскресение'
             );
         } else setDateError('');
+        console.log(dayOfWeek.format('X'))
     };
     useEffect(() => {
         closeDayHandler();
