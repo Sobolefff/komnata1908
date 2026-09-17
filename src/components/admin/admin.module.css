@@ -1,0 +1,215 @@
+.page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+    background: #111;
+    color: #eee;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+}
+
+.loginForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+}
+
+.loginForm input,
+.field input,
+.passwordForm input {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1c1c1c;
+    color: #eee;
+    font-size: 16px;
+}
+
+.loginForm button,
+.saveBar button,
+.passwordForm button,
+.logout {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #c9a24a;
+    color: #111;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.loginForm button:disabled,
+.saveBar button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error {
+    color: #ff6b6b;
+    margin: 0;
+}
+
+.dashboard {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.logout {
+    background: transparent;
+    border: 1px solid #666;
+    color: #eee;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-top: 1px solid #333;
+    padding-top: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.hint {
+    color: #aaa;
+    font-size: 14px;
+    margin: 0;
+}
+
+.daysGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dayToggle {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1c1c1c;
+    color: #eee;
+    cursor: pointer;
+    text-transform: capitalize;
+}
+
+.dayOpen {
+    background: #1f5a2f;
+    border-color: #3a3;
+    color: #b3ffb3;
+}
+
+.saveBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.passwordForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 320px;
+}
+
+.status {
+    color: #9be89b;
+    font-size: 14px;
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.exceptionForm {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.exceptionInput {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1c1c1c;
+    color: #eee;
+    font-size: 14px;
+    width: 130px;
+}
+
+.exceptionSelect {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1c1c1c;
+    color: #eee;
+    font-size: 14px;
+}
+
+.exceptionForm button {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #c9a24a;
+    color: #111;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.exceptionList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.exceptionItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.exceptionOpen {
+    color: #9be89b;
+}
+
+.exceptionClosed {
+    color: #ff6b6b;
+}
+
+.exceptionRemove {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid #666;
+    color: #eee;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
