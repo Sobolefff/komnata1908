@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { fetchConfig } from '../utils/adminApi';
+import { DEFAULT_OPEN_WEEKDAYS } from '../utils/bookingWindow';
 
 export const DEFAULT_SITE_CONFIG = {
     links: {
@@ -7,17 +8,22 @@ export const DEFAULT_SITE_CONFIG = {
         telegram: 'https://t.me/komnata1908',
         whatsapp: 'whatsapp://send?phone=79650726145',
     },
-    closedDates: [],
+    openWeekdays: DEFAULT_OPEN_WEEKDAYS,
 };
 
-function isValidConfig(data) {
-    return (
-        !!data &&
-        typeof data === 'object' &&
-        !!data.links &&
-        ['instagram', 'telegram', 'whatsapp'].every((key) => typeof data.links[key] === 'string') &&
-        Array.isArray(data.closedDates)
-    );
+// Принимает конфиг по частям: старое/повреждённое/отсутствующее поле не
+// должно затирать корректные соседние поля (например старый формат с
+// closedDates вместо openWeekdays всё ещё содержит рабочие links).
+function normalizeConfig(data) {
+    const links =
+        data && data.links && ['instagram', 'telegram', 'whatsapp'].every((key) => typeof data.links[key] === 'string')
+            ? data.links
+            : DEFAULT_SITE_CONFIG.links;
+    const openWeekdays =
+        data && Array.isArray(data.openWeekdays) && data.openWeekdays.every((d) => Number.isInteger(d) && d >= 0 && d <= 6)
+            ? data.openWeekdays
+            : DEFAULT_SITE_CONFIG.openWeekdays;
+    return { links, openWeekdays };
 }
 
 const SiteConfigContext = createContext({
@@ -33,14 +39,7 @@ export function SiteConfigProvider({ children }) {
     const refresh = useCallback(() => {
         setLoading(true);
         fetchConfig()
-            .then((data) => {
-                if (isValidConfig(data)) {
-                    setConfig(data);
-                } else {
-                    console.warn('Конфиг сайта имеет неожиданный формат, используются значения по умолчанию');
-                    setConfig(DEFAULT_SITE_CONFIG);
-                }
-            })
+            .then((data) => setConfig(normalizeConfig(data)))
             .catch((err) => {
                 console.warn('Не удалось загрузить конфиг сайта, используются значения по умолчанию', err);
                 setConfig(DEFAULT_SITE_CONFIG);

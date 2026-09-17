@@ -1,9 +1,9 @@
 # komnata1908-admin worker
 
 Отдельный Cloudflare Worker для страницы `/admin`. Хранит в KV ссылки
-хедера/футера, список закрытых для брони дат и хеш пароля администратора.
-Специально сделан отдельным воркером от `komnata1908-telegram`, чтобы баг
-здесь не мог сломать приём заявок.
+хедера/футера, список открытых для брони дней недели и хеш пароля
+администратора. Специально сделан отдельным воркером от
+`komnata1908-telegram`, чтобы баг здесь не мог сломать приём заявок.
 
 ## Деплой (один раз)
 
@@ -29,7 +29,7 @@ wrangler deploy
 
 ## Эндпоинты
 
-- `GET /config` — публичный, отдаёт `{ links, closedDates }`.
+- `GET /config` — публичный, отдаёт `{ links, openWeekdays }` (`openWeekdays` — числа 0-6, 0 = воскресенье).
 - `POST /login` — `{ password }` → `{ token, expiresIn }`.
 - `POST /config` — требует `Authorization: Bearer <token>`, сохраняет новый конфиг.
 - `POST /password` — требует токен, `{ currentPassword, newPassword }`.

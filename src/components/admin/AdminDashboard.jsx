@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react';
 import { useSiteConfig } from '../../context/SiteConfigContext';
 import { saveConfig } from '../../utils/adminApi';
 import LinksEditor from './LinksEditor';
-import ClosedDaysEditor from './ClosedDaysEditor';
+import WeekdaysEditor from './WeekdaysEditor';
 import PasswordEditor from './PasswordEditor';
 import styles from './admin.module.css';
 
 export default function AdminDashboard({ token, onLogout }) {
-    const { links, closedDates, loading, refresh } = useSiteConfig();
-    const [draft, setDraft] = useState({ links, closedDates });
+    const { links, openWeekdays, loading, refresh } = useSiteConfig();
+    const [draft, setDraft] = useState({ links, openWeekdays });
     const [status, setStatus] = useState('');
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        if (!loading) setDraft({ links, closedDates });
-    }, [loading, links, closedDates]);
+        if (!loading) setDraft({ links, openWeekdays });
+    }, [loading, links, openWeekdays]);
 
     const handleSave = () => {
         setSaving(true);
@@ -43,9 +43,9 @@ export default function AdminDashboard({ token, onLogout }) {
             </div>
 
             <LinksEditor links={draft.links} onChange={(links) => setDraft((prev) => ({ ...prev, links }))} />
-            <ClosedDaysEditor
-                closedDates={draft.closedDates}
-                onChange={(closedDates) => setDraft((prev) => ({ ...prev, closedDates }))}
+            <WeekdaysEditor
+                openWeekdays={draft.openWeekdays}
+                onChange={(openWeekdays) => setDraft((prev) => ({ ...prev, openWeekdays }))}
             />
 
             <div className={styles.saveBar}>

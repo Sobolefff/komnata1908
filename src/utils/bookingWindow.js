@@ -1,27 +1,22 @@
 import moment from 'moment';
 
-const THURSDAY = 4;
-const SATURDAY = 6;
-
 export const WEEKDAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+// moment's day() is locale-independent: 0 = Sunday ... 6 = Saturday.
+export const WEEKDAY_VALUES = [1, 2, 3, 4, 5, 6, 0];
 
-// Бронь принимаем только на ближайший блок четверг-пятница-суббота:
-// если сегодня раньше четверга — берём четверг текущей недели,
-// если сегодня уже чт/пт/сб — можно выбрать любой день от сегодня до субботы.
-export const getBookingWindow = () => {
+export const DEFAULT_OPEN_WEEKDAYS = [4, 5, 6]; // Чт, Пт, Сб
+
+// Бронь принимаем только на дни недели, включённые в openWeekdays, и только
+// в пределах текущего недельного цикла (воскресенье-суббота), начиная с
+// сегодня: следующий цикл открывается сам собой, когда наступает его
+// воскресенье, так что это работает бессрочно, неделя за неделей.
+export const getAvailableDates = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
     const today = moment().startOf('day');
-    const thursday = moment().day(THURSDAY).startOf('day');
-    const saturday = moment().day(SATURDAY).startOf('day');
-    const min = moment.max(today, thursday);
-    return { min, max: saturday };
-};
-
-export const getAvailableDates = (closedDates = []) => {
-    const { min, max } = getBookingWindow();
+    const cycleEnd = moment().day(6).startOf('day');
     const dates = [];
-    const cursor = min.clone();
-    while (cursor.isSameOrBefore(max)) {
-        if (!closedDates.includes(cursor.format('YYYY-MM-DD'))) {
+    const cursor = today.clone();
+    while (cursor.isSameOrBefore(cycleEnd, 'day')) {
+        if (openWeekdays.includes(cursor.day())) {
             dates.push(cursor.clone());
         }
         cursor.add(1, 'day');
@@ -29,10 +24,16 @@ export const getAvailableDates = (closedDates = []) => {
     return dates;
 };
 
-export const getCalendarDays = () => {
-    const { min } = getBookingWindow();
-    const gridStart = min.clone().startOf('month').startOf('isoWeek');
-    const gridEnd = min.clone().endOf('month').endOf('isoWeek');
+export const getDefaultBookingDate = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
+    const [first] = getAvailableDates(openWeekdays);
+    return first ? first.format('YYYY-MM-DD') : null;
+};
+
+export const getCalendarDays = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
+    const [firstAvailable] = getAvailableDates(openWeekdays);
+    const anchor = firstAvailable || moment().startOf('day');
+    const gridStart = anchor.clone().startOf('month').startOf('isoWeek');
+    const gridEnd = anchor.clone().endOf('month').endOf('isoWeek');
     const days = [];
     const cursor = gridStart.clone();
     while (cursor.isSameOrBefore(gridEnd)) {
@@ -42,9 +43,9 @@ export const getCalendarDays = () => {
     return days;
 };
 
-export const getDefaultBookingDate = (closedDates = []) => {
-    const [first] = getAvailableDates(closedDates);
-    return first ? first.format('YYYY-MM-DD') : null;
+export const getCalendarAnchor = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
+    const [firstAvailable] = getAvailableDates(openWeekdays);
+    return firstAvailable || moment().startOf('day');
 };
 
 export const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);

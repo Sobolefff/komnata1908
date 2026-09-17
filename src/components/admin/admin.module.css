@@ -110,11 +110,10 @@
     text-transform: capitalize;
 }
 
-.dayClosed {
-    background: #5a1f1f;
-    border-color: #a33;
-    color: #ffb3b3;
-    text-decoration: line-through;
+.dayOpen {
+    background: #1f5a2f;
+    border-color: #3a3;
+    color: #b3ffb3;
 }
 
 .saveBar {

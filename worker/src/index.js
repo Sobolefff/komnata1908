@@ -20,7 +20,7 @@ const DEFAULT_CONFIG = {
         telegram: 'https://t.me/komnata1908',
         whatsapp: 'whatsapp://send?phone=79650726145',
     },
-    closedDates: [],
+    openWeekdays: [4, 5, 6], // Чт, Пт, Сб; 0 = воскресенье ... 6 = суббота
 };
 
 function corsHeaders(origin) {
@@ -133,13 +133,13 @@ async function requireAuth(request, env) {
 
 function isValidConfig(data) {
     if (!data || typeof data !== 'object') return false;
-    const { links, closedDates } = data;
+    const { links, openWeekdays } = data;
     if (!links || typeof links !== 'object') return false;
     for (const key of ['instagram', 'telegram', 'whatsapp']) {
         if (typeof links[key] !== 'string') return false;
     }
-    if (!Array.isArray(closedDates)) return false;
-    if (!closedDates.every((d) => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d))) return false;
+    if (!Array.isArray(openWeekdays)) return false;
+    if (!openWeekdays.every((d) => Number.isInteger(d) && d >= 0 && d <= 6)) return false;
     return true;
 }
 

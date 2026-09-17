@@ -6,16 +6,16 @@ import {
     WEEKDAY_LABELS,
     capitalize,
     getAvailableDates,
-    getBookingWindow,
+    getCalendarAnchor,
     getCalendarDays,
 } from '../../utils/bookingWindow';
 import styles from './feedbackForm.module.css';
 
 export function DateField({ value, onChange }) {
     const { ref, isOpen, toggle } = useDropdown();
-    const { closedDates } = useSiteConfig();
-    const availableDates = getAvailableDates(closedDates);
-    const { min } = getBookingWindow();
+    const { openWeekdays } = useSiteConfig();
+    const availableDates = getAvailableDates(openWeekdays);
+    const anchor = getCalendarAnchor(openWeekdays);
 
     if (availableDates.length === 0) {
         return (
@@ -48,7 +48,7 @@ export function DateField({ value, onChange }) {
                 {isOpen && (
                     <div className={styles.calendar}>
                         <div className={styles.calendarHeader}>
-                            {capitalize(min.format('MMMM YYYY'))}
+                            {capitalize(anchor.format('MMMM YYYY'))}
                         </div>
                         <div className={styles.calendarWeekdays}>
                             {WEEKDAY_LABELS.map((d) => (
@@ -56,13 +56,13 @@ export function DateField({ value, onChange }) {
                             ))}
                         </div>
                         <div className={styles.calendarGrid}>
-                            {getCalendarDays().map((day) => {
+                            {getCalendarDays(openWeekdays).map((day) => {
                                 const dateStr = day.format('YYYY-MM-DD');
                                 const isAvailable = availableDates.some((d) =>
                                     d.isSame(day, 'day')
                                 );
                                 const isCurrentMonth =
-                                    day.month() === min.month();
+                                    day.month() === anchor.month();
                                 return (
                                     <button
                                         type="button"
