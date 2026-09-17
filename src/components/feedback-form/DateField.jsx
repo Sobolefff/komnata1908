@@ -1,34 +1,40 @@
 import moment from 'moment';
+import { useMemo, useState } from 'react';
 import calendarPath from '../../images/icons/calendar.png';
 import { useDropdown } from '../../hooks/useDropdown';
 import { useSiteConfig } from '../../context/SiteConfigContext';
-import {
-    WEEKDAY_LABELS,
-    capitalize,
-    getAvailableDates,
-    getCalendarAnchor,
-    getCalendarDays,
-} from '../../utils/bookingWindow';
+import { WEEKDAY_LABELS, capitalize, getCalendarDays, getDefaultBookingDate, isDateBookable } from '../../utils/bookingWindow';
 import styles from './feedbackForm.module.css';
+
+const YEARS_AHEAD = 2;
+
+function clampMonth(month, minMonth, maxMonth) {
+    if (month.isBefore(minMonth, 'month')) return minMonth.clone();
+    if (month.isAfter(maxMonth, 'month')) return maxMonth.clone();
+    return month;
+}
 
 export function DateField({ value, onChange }) {
     const { ref, isOpen, toggle } = useDropdown();
-    const { openWeekdays } = useSiteConfig();
-    const availableDates = getAvailableDates(openWeekdays);
-    const anchor = getCalendarAnchor(openWeekdays);
+    const { booking } = useSiteConfig();
+    const today = moment().startOf('day');
+    const minMonth = today.clone().startOf('month');
+    const maxMonth = today.clone().add(YEARS_AHEAD, 'years').endOf('year').startOf('month');
 
-    if (availableDates.length === 0) {
-        return (
-            <label className={styles.inputLabel}>
-                <img
-                    className={styles.icon}
-                    src={calendarPath}
-                    alt="иконка календаря"
-                />
-                <span className={styles.dropDownButton}>Сейчас нет доступных дат для брони</span>
-            </label>
-        );
-    }
+    const [viewedMonth, setViewedMonth] = useState(() =>
+        clampMonth((value ? moment(value) : today).clone().startOf('month'), minMonth, maxMonth)
+    );
+
+    const days = useMemo(() => getCalendarDays(viewedMonth), [viewedMonth]);
+    const hasAnyAvailability = useMemo(() => getDefaultBookingDate(booking) !== null, [booking]);
+    const monthNames = useMemo(() => moment.localeData().months(), []);
+    const yearOptions = useMemo(() => {
+        const years = [];
+        for (let y = today.year(); y <= today.year() + YEARS_AHEAD; y++) years.push(y);
+        return years;
+    }, [today]);
+
+    const goToMonth = (next) => setViewedMonth(clampMonth(next, minMonth, maxMonth));
 
     return (
         <label className={styles.inputLabel}>
@@ -43,12 +49,51 @@ export function DateField({ value, onChange }) {
                     onClick={toggle}
                     className={styles.dropDownButton}
                 >
-                    {capitalize(moment(value).format('dddd, DD.MM'))}
+                    {value ? capitalize(moment(value).format('dddd, DD.MM')) : 'Выберите дату'}
                 </button>
                 {isOpen && (
                     <div className={styles.calendar}>
-                        <div className={styles.calendarHeader}>
-                            {capitalize(anchor.format('MMMM YYYY'))}
+                        <div className={styles.calendarNav}>
+                            <button
+                                type="button"
+                                className={styles.calendarNavButton}
+                                onClick={() => goToMonth(viewedMonth.clone().subtract(1, 'month'))}
+                                disabled={viewedMonth.isSame(minMonth, 'month')}
+                                aria-label="Предыдущий месяц"
+                            >
+                                ‹
+                            </button>
+                            <select
+                                className={styles.calendarSelect}
+                                value={viewedMonth.month()}
+                                onChange={(e) => goToMonth(viewedMonth.clone().month(Number(e.target.value)))}
+                            >
+                                {monthNames.map((name, i) => (
+                                    <option key={name} value={i}>
+                                        {capitalize(name)}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className={styles.calendarSelect}
+                                value={viewedMonth.year()}
+                                onChange={(e) => goToMonth(viewedMonth.clone().year(Number(e.target.value)))}
+                            >
+                                {yearOptions.map((year) => (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                className={styles.calendarNavButton}
+                                onClick={() => goToMonth(viewedMonth.clone().add(1, 'month'))}
+                                disabled={viewedMonth.isSame(maxMonth, 'month')}
+                                aria-label="Следующий месяц"
+                            >
+                                ›
+                            </button>
                         </div>
                         <div className={styles.calendarWeekdays}>
                             {WEEKDAY_LABELS.map((d) => (
@@ -56,13 +101,10 @@ export function DateField({ value, onChange }) {
                             ))}
                         </div>
                         <div className={styles.calendarGrid}>
-                            {getCalendarDays(openWeekdays).map((day) => {
+                            {days.map((day) => {
                                 const dateStr = day.format('YYYY-MM-DD');
-                                const isAvailable = availableDates.some((d) =>
-                                    d.isSame(day, 'day')
-                                );
-                                const isCurrentMonth =
-                                    day.month() === anchor.month();
+                                const isAvailable = isDateBookable(day, booking);
+                                const isCurrentMonth = day.month() === viewedMonth.month();
                                 return (
                                     <button
                                         type="button"
@@ -84,12 +126,15 @@ export function DateField({ value, onChange }) {
                                 );
                             })}
                         </div>
+                        {!hasAnyAvailability && (
+                            <div className={styles.calendarEmptyHint}>Сейчас нет доступных дат для брони</div>
+                        )}
                     </div>
                 )}
                 <input
                     type="text"
                     name="Data"
-                    value={value}
+                    value={value || ''}
                     readOnly
                     className={styles.hiddenInput}
                 />

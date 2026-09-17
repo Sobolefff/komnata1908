@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { fetchConfig } from '../utils/adminApi';
-import { DEFAULT_OPEN_WEEKDAYS } from '../utils/bookingWindow';
+import { DEFAULT_BOOKING_CONFIG } from '../utils/bookingWindow';
 
 export const DEFAULT_SITE_CONFIG = {
     links: {
@@ -8,22 +8,53 @@ export const DEFAULT_SITE_CONFIG = {
         telegram: 'https://t.me/komnata1908',
         whatsapp: 'whatsapp://send?phone=79650726145',
     },
-    openWeekdays: DEFAULT_OPEN_WEEKDAYS,
+    booking: DEFAULT_BOOKING_CONFIG,
 };
 
-// Принимает конфиг по частям: старое/повреждённое/отсутствующее поле не
-// должно затирать корректные соседние поля (например старый формат с
-// closedDates вместо openWeekdays всё ещё содержит рабочие links).
+function isWeekdayArray(value) {
+    return Array.isArray(value) && value.every((d) => Number.isInteger(d) && d >= 0 && d <= 6);
+}
+
+function isWeekOverride(value) {
+    return value === null || isWeekdayArray(value);
+}
+
+function isDateOverrides(value) {
+    return (
+        !!value &&
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        Object.entries(value).every(([key, v]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof v === 'boolean')
+    );
+}
+
+// Каждое поле нормализуется независимо: старый/повреждённый/отсутствующий
+// кусок конфига не должен затирать соседние корректные поля (например,
+// самый первый формат хранил только closedDates, следующий - openWeekdays
+// на верхнем уровне; оба должны тихо откатываться на дефолт, не теряя links).
 function normalizeConfig(data) {
     const links =
         data && data.links && ['instagram', 'telegram', 'whatsapp'].every((key) => typeof data.links[key] === 'string')
             ? data.links
             : DEFAULT_SITE_CONFIG.links;
-    const openWeekdays =
-        data && Array.isArray(data.openWeekdays) && data.openWeekdays.every((d) => Number.isInteger(d) && d >= 0 && d <= 6)
-            ? data.openWeekdays
-            : DEFAULT_SITE_CONFIG.openWeekdays;
-    return { links, openWeekdays };
+
+    const rawBooking = (data && data.booking) || data || {};
+    const booking = {
+        openWeekdays: isWeekdayArray(rawBooking.openWeekdays) ? rawBooking.openWeekdays : DEFAULT_BOOKING_CONFIG.openWeekdays,
+        allowFutureWeeks:
+            typeof rawBooking.allowFutureWeeks === 'boolean' ? rawBooking.allowFutureWeeks : DEFAULT_BOOKING_CONFIG.allowFutureWeeks,
+        weekOverrides: {
+            current: isWeekOverride(rawBooking.weekOverrides && rawBooking.weekOverrides.current)
+                ? rawBooking.weekOverrides.current
+                : DEFAULT_BOOKING_CONFIG.weekOverrides.current,
+            next: isWeekOverride(rawBooking.weekOverrides && rawBooking.weekOverrides.next)
+                ? rawBooking.weekOverrides.next
+                : DEFAULT_BOOKING_CONFIG.weekOverrides.next,
+        },
+        dateOverrides: isDateOverrides(rawBooking.dateOverrides) ? rawBooking.dateOverrides : DEFAULT_BOOKING_CONFIG.dateOverrides,
+    };
+
+    return { links, booking };
 }
 
 const SiteConfigContext = createContext({

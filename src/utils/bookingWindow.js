@@ -3,37 +3,55 @@ import moment from 'moment';
 export const WEEKDAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 // moment's day() is locale-independent: 0 = Sunday ... 6 = Saturday.
 export const WEEKDAY_VALUES = [1, 2, 3, 4, 5, 6, 0];
+export const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 
-export const DEFAULT_OPEN_WEEKDAYS = [4, 5, 6]; // Чт, Пт, Сб
+export const DEFAULT_BOOKING_CONFIG = {
+    openWeekdays: ALL_WEEKDAYS,
+    allowFutureWeeks: true,
+    weekOverrides: { current: null, next: null },
+    dateOverrides: {},
+};
 
-// Бронь принимаем только на дни недели, включённые в openWeekdays, и только
-// в пределах текущего недельного цикла (воскресенье-суббота), начиная с
-// сегодня: следующий цикл открывается сам собой, когда наступает его
-// воскресенье, так что это работает бессрочно, неделя за неделей.
-export const getAvailableDates = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
+const MAX_SEARCH_DAYS = 730; // safety cap so "infinite weeks ahead" can't loop forever
+
+// Понедельный цикл воскресенье-суббота, используемый как единица отсчёта для
+// "текущая неделя" / "следующая неделя" — тот же, что раньше был жёстко
+// зашит для окна чт-пт-сб.
+function weekIndexOf(date) {
+    const cycleStart = moment().day(0).startOf('day');
+    return Math.floor(date.diff(cycleStart, 'days') / 7);
+}
+
+export function isDateBookable(date, booking = DEFAULT_BOOKING_CONFIG) {
     const today = moment().startOf('day');
-    const cycleEnd = moment().day(6).startOf('day');
-    const dates = [];
-    const cursor = today.clone();
-    while (cursor.isSameOrBefore(cycleEnd, 'day')) {
-        if (openWeekdays.includes(cursor.day())) {
-            dates.push(cursor.clone());
-        }
+    if (date.isBefore(today, 'day')) return false;
+
+    const dateStr = date.format('YYYY-MM-DD');
+    if (Object.prototype.hasOwnProperty.call(booking.dateOverrides || {}, dateStr)) {
+        return !!booking.dateOverrides[dateStr];
+    }
+
+    const weekIndex = weekIndexOf(date);
+    if (weekIndex >= 1 && booking.allowFutureWeeks === false) return false;
+
+    const weekOverride = weekIndex === 0 ? booking.weekOverrides.current : weekIndex === 1 ? booking.weekOverrides.next : null;
+    if (Array.isArray(weekOverride)) return weekOverride.includes(date.day());
+
+    return (booking.openWeekdays || ALL_WEEKDAYS).includes(date.day());
+}
+
+export const getDefaultBookingDate = (booking = DEFAULT_BOOKING_CONFIG) => {
+    const cursor = moment().startOf('day');
+    for (let i = 0; i < MAX_SEARCH_DAYS; i++) {
+        if (isDateBookable(cursor, booking)) return cursor.format('YYYY-MM-DD');
         cursor.add(1, 'day');
     }
-    return dates;
+    return null;
 };
 
-export const getDefaultBookingDate = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
-    const [first] = getAvailableDates(openWeekdays);
-    return first ? first.format('YYYY-MM-DD') : null;
-};
-
-export const getCalendarDays = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
-    const [firstAvailable] = getAvailableDates(openWeekdays);
-    const anchor = firstAvailable || moment().startOf('day');
-    const gridStart = anchor.clone().startOf('month').startOf('isoWeek');
-    const gridEnd = anchor.clone().endOf('month').endOf('isoWeek');
+export const getCalendarDays = (monthAnchor) => {
+    const gridStart = monthAnchor.clone().startOf('month').startOf('isoWeek');
+    const gridEnd = monthAnchor.clone().endOf('month').endOf('isoWeek');
     const days = [];
     const cursor = gridStart.clone();
     while (cursor.isSameOrBefore(gridEnd)) {
@@ -41,11 +59,6 @@ export const getCalendarDays = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
         cursor.add(1, 'day');
     }
     return days;
-};
-
-export const getCalendarAnchor = (openWeekdays = DEFAULT_OPEN_WEEKDAYS) => {
-    const [firstAvailable] = getAvailableDates(openWeekdays);
-    return firstAvailable || moment().startOf('day');
 };
 
 export const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);

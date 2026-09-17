@@ -1,9 +1,11 @@
 // Cloudflare Worker: backend for the /admin panel.
 //
-// Stores site config (header/footer links + closed booking dates) and the
-// admin password hash in KV, and issues short-lived signed tokens for admin
-// requests. Deployed separately from the Telegram booking-proxy worker so a
-// bug here can never affect the booking flow.
+// Stores site config (header/footer links + the booking schedule: recurring
+// open weekdays, a future-weeks on/off switch, this/next week overrides and
+// per-date exceptions) and the admin password hash in KV, and issues
+// short-lived signed tokens for admin requests. Deployed separately from the
+// Telegram booking-proxy worker so a bug here can never affect the booking
+// flow.
 //
 // Bindings expected (see wrangler.toml):
 //   KV namespace  CONFIG_KV
@@ -20,7 +22,12 @@ const DEFAULT_CONFIG = {
         telegram: 'https://t.me/komnata1908',
         whatsapp: 'whatsapp://send?phone=79650726145',
     },
-    openWeekdays: [4, 5, 6], // Чт, Пт, Сб; 0 = воскресенье ... 6 = суббота
+    booking: {
+        openWeekdays: [0, 1, 2, 3, 4, 5, 6], // все дни; 0 = воскресенье ... 6 = суббота
+        allowFutureWeeks: true,
+        weekOverrides: { current: null, next: null },
+        dateOverrides: {},
+    },
 };
 
 function corsHeaders(origin) {
@@ -131,15 +138,34 @@ async function requireAuth(request, env) {
     return verifyToken(token, env.ADMIN_TOKEN_SECRET);
 }
 
+function isWeekdayArray(value) {
+    return Array.isArray(value) && value.every((d) => Number.isInteger(d) && d >= 0 && d <= 6);
+}
+
 function isValidConfig(data) {
     if (!data || typeof data !== 'object') return false;
-    const { links, openWeekdays } = data;
+    const { links, booking } = data;
+
     if (!links || typeof links !== 'object') return false;
     for (const key of ['instagram', 'telegram', 'whatsapp']) {
         if (typeof links[key] !== 'string') return false;
     }
-    if (!Array.isArray(openWeekdays)) return false;
-    if (!openWeekdays.every((d) => Number.isInteger(d) && d >= 0 && d <= 6)) return false;
+
+    if (!booking || typeof booking !== 'object') return false;
+    if (!isWeekdayArray(booking.openWeekdays)) return false;
+    if (typeof booking.allowFutureWeeks !== 'boolean') return false;
+
+    const { weekOverrides, dateOverrides } = booking;
+    if (!weekOverrides || typeof weekOverrides !== 'object') return false;
+    for (const key of ['current', 'next']) {
+        if (weekOverrides[key] !== null && !isWeekdayArray(weekOverrides[key])) return false;
+    }
+
+    if (!dateOverrides || typeof dateOverrides !== 'object' || Array.isArray(dateOverrides)) return false;
+    for (const [dateKey, value] of Object.entries(dateOverrides)) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey) || typeof value !== 'boolean') return false;
+    }
+
     return true;
 }
 

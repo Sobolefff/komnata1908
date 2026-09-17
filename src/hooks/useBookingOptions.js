@@ -1,29 +1,29 @@
+import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
-import { getAvailableDates, getDefaultBookingDate } from '../utils/bookingWindow';
+import { getDefaultBookingDate, isDateBookable } from '../utils/bookingWindow';
 
-const defaultOptions = (openWeekdays) => ({
-    date: getDefaultBookingDate(openWeekdays),
+const defaultOptions = (booking) => ({
+    date: getDefaultBookingDate(booking),
     time: '20:00',
     guests: '1',
 });
 
 export function useBookingOptions() {
-    const { openWeekdays } = useSiteConfig();
-    const [options, setOptions] = useState(() => defaultOptions(openWeekdays));
+    const { booking } = useSiteConfig();
+    const [options, setOptions] = useState(() => defaultOptions(booking));
 
     useEffect(() => {
         setOptions((prev) => {
-            const availableDates = getAvailableDates(openWeekdays).map((d) => d.format('YYYY-MM-DD'));
-            if (prev.date && availableDates.includes(prev.date)) return prev;
-            return { ...prev, date: getDefaultBookingDate(openWeekdays) };
+            if (prev.date && isDateBookable(moment(prev.date), booking)) return prev;
+            return { ...prev, date: getDefaultBookingDate(booking) };
         });
-    }, [openWeekdays]);
+    }, [booking]);
 
     const setDate = (date) => setOptions((prev) => ({ ...prev, date }));
     const setTime = (time) => setOptions((prev) => ({ ...prev, time }));
     const setGuests = (guests) => setOptions((prev) => ({ ...prev, guests }));
-    const reset = () => setOptions(defaultOptions(openWeekdays));
+    const reset = () => setOptions(defaultOptions(booking));
 
     return { options, setDate, setTime, setGuests, reset };
 }
