@@ -6,7 +6,10 @@ export default function Header() {
     return (
         <header className={styles.header}>
             <SocialLinks listClassName={styles.social} itemClassName={styles.icon} />
-            <h1 className={styles.title}>KOMNATA 1908</h1>
+            <h1 className={styles.title}>
+                KOMNATA 1908
+                <span className={styles.visuallyHidden}> — секретный спикизи-бар в центре Санкт-Петербурга</span>
+            </h1>
             <HeaderButton />
         </header>
     );

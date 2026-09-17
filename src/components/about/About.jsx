@@ -3,6 +3,7 @@ import styles from './about.module.css';
 export default function About() {
     return (
         <section className={styles.about}>
+            <h2 className={styles.title}>Секретный бар в центре Санкт-Петербурга</h2>
             <p className={styles.paragraph}>
             1908 год — это год падения Тунгусского метеорита, который стал одной из главных загадок современной истории. 
             Многие учёные пытались разгадать его загадку, но в итоге мы имеем лишь сотню разнообразных теорий.

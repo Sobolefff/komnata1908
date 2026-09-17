@@ -1,3 +1,18 @@
+# Force HTTPS so the site is never indexed/served under both http and
+# https (duplicate content) and so HTTPS counts as a ranking signal.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # SPA fallback: routes like /thanks have no matching file on disk,
+    # so serve index.html and let React Router (and per-route <Helmet>
+    # tags, e.g. noindex on /thanks) take over client-side.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.html [L]
+</IfModule>
+
 # index.html must always be re-fetched so browsers pick up new
 # hashed asset filenames (main.<hash>.js/css) right after each deploy.
 <IfModule mod_headers.c>

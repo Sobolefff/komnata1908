@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from "react-router-dom";
 import { Feedback } from "../feedback/Feedback";
 import styles from './thanks.module.css';
@@ -9,6 +10,10 @@ export default function Thanks() {
     }
     return (
         <Feedback>
+            <Helmet>
+                <title>Заявка отправлена — Komnata 1908</title>
+                <meta name="robots" content="noindex, follow" />
+            </Helmet>
             <div className={styles.thanks}>
                 <h2 className={styles.title}>Спасибо за заявку!</h2>
                 <h3 className={styles.subtitle}>В ближайшее время мы свяжемся с вами для уточнения деталей брони.</h3>
