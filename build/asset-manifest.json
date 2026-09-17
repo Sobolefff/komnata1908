@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.fbd99ee0.css",
-    "main.js": "/static/js/main.00cbafc2.js",
+    "main.js": "/static/js/main.a62d07ce.js",
     "static/media/feedbackbg.jpg": "/static/media/feedbackbg.dbf594cbca312e6d82e6.jpg",
     "static/media/headerbg.jpg": "/static/media/headerbg.1940b90cbacc6320bb16.jpg",
     "static/media/cocktail.jpg": "/static/media/cocktail.a51044f16d68dd44f786.jpg",
@@ -27,10 +27,10 @@
     "static/media/museomoderno-vietnamese-400-normal.woff2": "/static/media/museomoderno-vietnamese-400-normal.6320e14d2971ebe508ca.woff2",
     "index.html": "/index.html",
     "main.fbd99ee0.css.map": "/static/css/main.fbd99ee0.css.map",
-    "main.00cbafc2.js.map": "/static/js/main.00cbafc2.js.map"
+    "main.a62d07ce.js.map": "/static/js/main.a62d07ce.js.map"
   },
   "entrypoints": [
     "static/css/main.fbd99ee0.css",
-    "static/js/main.00cbafc2.js"
+    "static/js/main.a62d07ce.js"
   ]
 }
