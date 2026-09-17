@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.e9d398c5.css",
-    "main.js": "/static/js/main.93f097c0.js",
+    "main.js": "/static/js/main.3f180205.js",
     "static/media/inter-all-400-normal.woff": "/static/media/inter-all-400-normal.8c804432e8c67741aac0.woff",
     "static/media/headerbg.webp": "/static/media/headerbg.eab779adef686f1b85b8.webp",
     "static/media/feedbackbg.webp": "/static/media/feedbackbg.b2cd20e0bbf5ade5d827.webp",
@@ -27,10 +27,10 @@
     "static/media/montserrat-vietnamese-400-normal.woff2": "/static/media/montserrat-vietnamese-400-normal.8f3f4c99eb0eeb5990f1.woff2",
     "static/media/museomoderno-vietnamese-400-normal.woff2": "/static/media/museomoderno-vietnamese-400-normal.6320e14d2971ebe508ca.woff2",
     "main.e9d398c5.css.map": "/static/css/main.e9d398c5.css.map",
-    "main.93f097c0.js.map": "/static/js/main.93f097c0.js.map"
+    "main.3f180205.js.map": "/static/js/main.3f180205.js.map"
   },
   "entrypoints": [
     "static/css/main.e9d398c5.css",
-    "static/js/main.93f097c0.js"
+    "static/js/main.3f180205.js"
   ]
 }
