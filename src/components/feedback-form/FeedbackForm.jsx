@@ -10,6 +10,7 @@ import clockPath from '../../images/icons/clock.png';
 import userPath from '../../images/icons/user.png';
 import { data } from '../../utils/times';
 import { Utm } from 'utm-extractor';
+import { reachGoal } from '../../utils/analytics';
 
 export default function FeedbackForm() {
     const url = document.location.href.split('#')[0];
@@ -50,6 +51,7 @@ export default function FeedbackForm() {
     const [formValid, setFormValid] = useState(false);
     const [dateError, setDateError] = useState('');
     const [buttonText, setButtonText] = useState('Оставить заявку');
+    const [submitError, setSubmitError] = useState('');
     const [showDropDown, setShowDropDown] = useState(false);
     const [showDropDownGuests, setShowDropDownGuests] = useState(false);
 
@@ -58,7 +60,7 @@ export default function FeedbackForm() {
             ? setFormValid(false)
             : setFormValid(true);
         if (!nameError && !telError) {
-            window.ym(90093500, 'reachGoal', 'name-tel');
+            reachGoal('name-tel');
         }
     }, [nameError, telError, dateError]);
 
@@ -74,28 +76,21 @@ export default function FeedbackForm() {
                 ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
                 : moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD')
         );
-        // setMaxInterval(
-        //     dayOfWeek.format('dddd') === 'воскресение'
-        //         ? dayOfWeek.format('YYYY-MM-DD')
-        //         : moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-        // );
-        if (options.date === '2022-09-09') {
-            setDateError('К сожалению, все места заняты');
-        } else if (
+        if (
             dayOfWeek.format('X') < moment(getToWeekend()).format('X') ||
             dayOfWeek.format('X') >
                 moment(getToWeekend()).add(2, 'd').format('X') ||
-            (moment().format('dddd') === 'воскресение' &&
+            (moment().format('dddd') === 'воскресенье' &&
                 dayOfWeek.format('X') > moment(getToWeekend()).format('X'))
         ) {
             setDateError(
-                'Принимаем бронь только на ближайшую пятницу, субботу и воскресение'
+                'Принимаем бронь только на ближайшую пятницу, субботу и воскресенье'
             );
         } else setDateError('');
-        console.log(dayOfWeek.format('X'))
     };
     useEffect(() => {
         closeDayHandler();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- closeDayHandler is recreated every render; re-running on identity change would be a no-op loop, not a bug
     }, [options.date]);
 
     const handlerDate = (e) => {
@@ -104,6 +99,7 @@ export default function FeedbackForm() {
     const handlerFormSubmit = (e) => {
         e.preventDefault();
         setFormValid(false);
+        setSubmitError('');
         setButtonText('Отправка...');
 
         const TOKEN = '5418369687:AAHCMy9pCFT7S1-BDWexPZZW1YS11CPd1I8';
@@ -149,10 +145,14 @@ export default function FeedbackForm() {
             })
             .catch((err) => {
                 console.warn(err);
+                setButtonText('Оставить заявку');
+                setFormValid(true);
+                setSubmitError(
+                    'Не удалось отправить заявку. Попробуйте ещё раз или напишите нам в Telegram/WhatsApp.'
+                );
             })
             .finally(() => {
-                window.ym(90093500, 'reachGoal', 'form-submit');
-                console.log('Success');
+                reachGoal('form-submit');
             });
 
         setOptions({
@@ -196,7 +196,7 @@ export default function FeedbackForm() {
 
     const telHandler = (e) => {
         setTel(e.target.value);
-        const re = /^((8|\+7)[\-]?)?(\(?\d{3}\)?[\-]?)?[\d\-]{7,10}$/;
+        const re = /^((8|\+7)[-]?)?(\(?\d{3}\)?[-]?)?[\d-]{7,10}$/;
         if (!re.test(String(e.target.value))) {
             setTelError('Введите корректный номер телефона');
         } else {
@@ -390,15 +390,16 @@ export default function FeedbackForm() {
                 <fieldset className={styles.submitContainer}>
                     <button
                         disabled={!formValid}
-                        onClick={() =>
-                            window.ym(90093500, 'reachGoal', 'submit-click')
-                        }
+                        onClick={() => reachGoal('submit-click')}
                         id="form-submit"
                         type="submit"
                         className={styles.submitButton}
                     >
                         {buttonText}
                     </button>
+                    {submitError && (
+                        <span className={styles.error}>{submitError}</span>
+                    )}
                 </fieldset>
             </form>
         </Feedback>
