@@ -16,12 +16,14 @@ export const getBookingWindow = () => {
     return { min, max: saturday };
 };
 
-export const getAvailableDates = () => {
+export const getAvailableDates = (closedDates = []) => {
     const { min, max } = getBookingWindow();
     const dates = [];
     const cursor = min.clone();
     while (cursor.isSameOrBefore(max)) {
-        dates.push(cursor.clone());
+        if (!closedDates.includes(cursor.format('YYYY-MM-DD'))) {
+            dates.push(cursor.clone());
+        }
         cursor.add(1, 'day');
     }
     return dates;
@@ -40,6 +42,9 @@ export const getCalendarDays = () => {
     return days;
 };
 
-export const getDefaultBookingDate = () => getAvailableDates()[0].format('YYYY-MM-DD');
+export const getDefaultBookingDate = (closedDates = []) => {
+    const [first] = getAvailableDates(closedDates);
+    return first ? first.format('YYYY-MM-DD') : null;
+};
 
 export const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);

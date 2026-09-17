@@ -32,6 +32,8 @@
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:ghpages": "PUBLIC_URL=/komnata1908 react-scripts build && cp build/index.html build/404.html",
+    "deploy:ghpages": "npm run build:ghpages && gh-pages -d build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

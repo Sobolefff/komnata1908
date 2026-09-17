@@ -1,6 +1,7 @@
 import moment from 'moment';
 import calendarPath from '../../images/icons/calendar.png';
 import { useDropdown } from '../../hooks/useDropdown';
+import { useSiteConfig } from '../../context/SiteConfigContext';
 import {
     WEEKDAY_LABELS,
     capitalize,
@@ -12,8 +13,22 @@ import styles from './feedbackForm.module.css';
 
 export function DateField({ value, onChange }) {
     const { ref, isOpen, toggle } = useDropdown();
-    const availableDates = getAvailableDates();
+    const { closedDates } = useSiteConfig();
+    const availableDates = getAvailableDates(closedDates);
     const { min } = getBookingWindow();
+
+    if (availableDates.length === 0) {
+        return (
+            <label className={styles.inputLabel}>
+                <img
+                    className={styles.icon}
+                    src={calendarPath}
+                    alt="иконка календаря"
+                />
+                <span className={styles.dropDownButton}>Сейчас нет доступных дат для брони</span>
+            </label>
+        );
+    }
 
     return (
         <label className={styles.inputLabel}>

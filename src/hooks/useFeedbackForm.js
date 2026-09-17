@@ -23,12 +23,12 @@ export function useFeedbackForm() {
     const [submitError, setSubmitError] = useState('');
 
     useEffect(() => {
-        const isValid = !name.error && !tel.error;
+        const isValid = !name.error && !tel.error && !!bookingOptions.options.date;
         setFormValid(isValid);
         if (isValid) {
             reachGoal('name-tel');
         }
-    }, [name.error, tel.error]);
+    }, [name.error, tel.error, bookingOptions.options.date]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
