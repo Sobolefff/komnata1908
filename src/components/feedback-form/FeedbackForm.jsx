@@ -24,24 +24,26 @@ export default function FeedbackForm() {
     const guests = Array.from(guestsArr);
     const navigate = useNavigate();
 
-    const getToWeekend = () => {
-        let weekend = Number(moment().format('d'));
-        let sum = 0;
-        if (weekend < 5) {
-            sum = 4 - weekend; // для открытия четверга - 4, для пт и сб - 5
-            return (weekend = moment().add(sum, 'd').format('YYYY-MM-DD'));
-        } else return (weekend = moment().format('YYYY-MM-DD'));
+    // Бронь принимаем только на ближайший блок четверг-пятница-суббота:
+    // если сегодня раньше четверга — берём четверг текущей недели,
+    // если сегодня уже чт/пт/сб — можно выбрать любой день от сегодня до субботы.
+    const getBookingWindow = () => {
+        const today = moment().startOf('day');
+        const thursday = moment().day(4).startOf('day');
+        const saturday = moment().day(6).startOf('day');
+        const min = moment.max(today, thursday);
+        return { min, max: saturday };
     };
+    const getMinDate = () => getBookingWindow().min.format('YYYY-MM-DD');
+    const getMaxDate = () => getBookingWindow().max.format('YYYY-MM-DD');
 
     const [options, setOptions] = useState({
-        date: getToWeekend(),
+        date: getMinDate(),
         time: '20:00',
         guests: '1',
     });
 
-    const [maxInterval, setMaxInterval] = useState(
-        moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD')
-    );
+    const [maxInterval, setMaxInterval] = useState(getMaxDate());
     const [name, setName] = useState('');
     const [tel, setTel] = useState('');
     const [nameDirty, setNameDirty] = useState(false);
@@ -65,26 +67,12 @@ export default function FeedbackForm() {
     }, [nameError, telError, dateError]);
 
     const closeDayHandler = () => {
-        const dayOfWeek = moment(options.date);
-        // чт/пт/сб или пт/сб
-        setMaxInterval(
-            dayOfWeek.format('dddd') === 'суббота'
-                ? dayOfWeek.format('YYYY-MM-DD')
-                : dayOfWeek.format('dddd') === 'четверг'
-                ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-                : dayOfWeek.format('dddd') === 'пятница'
-                ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-                : moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD')
-        );
-        if (
-            dayOfWeek.format('X') < moment(getToWeekend()).format('X') ||
-            dayOfWeek.format('X') >
-                moment(getToWeekend()).add(2, 'd').format('X') ||
-            (moment().format('dddd') === 'воскресенье' &&
-                dayOfWeek.format('X') > moment(getToWeekend()).format('X'))
-        ) {
+        const { min, max } = getBookingWindow();
+        setMaxInterval(max.format('YYYY-MM-DD'));
+        const selectedDate = moment(options.date).startOf('day');
+        if (selectedDate.isBefore(min) || selectedDate.isAfter(max)) {
             setDateError(
-                'Принимаем бронь только на ближайшую пятницу, субботу и воскресенье'
+                'Принимаем бронь только на ближайшие четверг, пятницу и субботу'
             );
         } else setDateError('');
     };
@@ -140,7 +128,7 @@ export default function FeedbackForm() {
             });
 
         setOptions({
-            date: getToWeekend(),
+            date: getMinDate(),
             time: '20:00',
             guests: '1',
         });
@@ -271,7 +259,7 @@ export default function FeedbackForm() {
                             alt="иконка календаря"
                         />
                         <input
-                            min={getToWeekend()}
+                            min={getMinDate()}
                             max={maxInterval}
                             type="date"
                             name="Data"
