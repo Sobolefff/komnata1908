@@ -102,27 +102,9 @@ export default function FeedbackForm() {
         setSubmitError('');
         setButtonText('Отправка...');
 
-        const TOKEN = '5418369687:AAHCMy9pCFT7S1-BDWexPZZW1YS11CPd1I8';
-        const CHAT_ID = '-1001736786651';
-        const URL_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+        const PROXY_API =
+            'https://komnata1908-telegram.petr-sobolew.workers.dev';
 
-        let message = `<b><i>Заявка с сайта:</i></b>\n\n`;
-        message += `<i>Основная информация:</i>\n`;
-        message += `Отправитель: <b>${name}</b>\n`;
-        message += `Телефон: <b>${tel}</b>\n`;
-        message += `Желаемая дата: <b>${moment(options.date).format(
-            'ddd DD.MM.YYYY'
-        )}</b>\n`;
-        message += `Желаемое время: <b>${options.time}</b>\n`;
-        message += `Количество гостей: <b>${options.guests}</b>\n\n`;
-        if (new URL(url).search) {
-            message += `<i>Дополнительная информация:</i>\n`;
-            message += `UTM source: <b>${utmValues.utm_source}</b>\n`;
-            message += `UTM medium: <b>${utmValues.utm_medium}</b>\n`;
-            message += `UTM campaign: <b>${utmValues.utm_campaign}</b>\n`;
-            message += `UTM content: <b>${utmValues.utm_content}</b>\n`;
-            message += `UTM term: <b>${utmValues.utm_term}</b>\n`;
-        }
         const sheetUrl =
             'https://script.google.com/macros/s/AKfycbzZVbb4WWi1NBKlRopRsIZMpt3cE51wnPz6B_RmdZRON2dK63imOeVSZH6eGFoK8u7D/exec';
         const sheetApi = () => {
@@ -133,11 +115,13 @@ export default function FeedbackForm() {
         };
         sheetApi();
         axios
-            .post(URL_API, {
-                chat_id: CHAT_ID,
-                parse_mode: 'html',
-                text: message,
-                disable_notification: false,
+            .post(PROXY_API, {
+                name,
+                tel,
+                date: moment(options.date).format('ddd DD.MM.YYYY'),
+                time: options.time,
+                guests: options.guests,
+                utm: new URL(url).search ? utmValues : undefined,
             })
             .then((res) => {
                 navigate('/thanks');
