@@ -55,3 +55,6 @@ export const data = [
         "type":"guest_vol"
     },
 ]
+
+export const timeOptions = data.filter((el) => el.type === 'time');
+export const guestOptions = data.filter((el) => el.type === 'guest_vol');
