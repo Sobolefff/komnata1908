@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /thanks
+Disallow: /admin
+Sitemap: https://komnata1908.ru/sitemap.xml
+Clean-param: ref /
