@@ -7,7 +7,6 @@ export const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 
 export const DEFAULT_BOOKING_CONFIG = {
     openWeekdays: ALL_WEEKDAYS,
-    allowFutureWeeks: true,
     weekOverrides: { current: null, next: null },
     dateOverrides: {},
 };
@@ -32,8 +31,6 @@ export function isDateBookable(date, booking = DEFAULT_BOOKING_CONFIG) {
     }
 
     const weekIndex = weekIndexOf(date);
-    if (weekIndex >= 1 && booking.allowFutureWeeks === false) return false;
-
     const weekOverride = weekIndex === 0 ? booking.weekOverrides.current : weekIndex === 1 ? booking.weekOverrides.next : null;
     if (Array.isArray(weekOverride)) return weekOverride.includes(date.day());
 

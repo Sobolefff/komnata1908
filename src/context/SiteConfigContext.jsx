@@ -41,8 +41,6 @@ function normalizeConfig(data) {
     const rawBooking = (data && data.booking) || data || {};
     const booking = {
         openWeekdays: isWeekdayArray(rawBooking.openWeekdays) ? rawBooking.openWeekdays : DEFAULT_BOOKING_CONFIG.openWeekdays,
-        allowFutureWeeks:
-            typeof rawBooking.allowFutureWeeks === 'boolean' ? rawBooking.allowFutureWeeks : DEFAULT_BOOKING_CONFIG.allowFutureWeeks,
         weekOverrides: {
             current: isWeekOverride(rawBooking.weekOverrides && rawBooking.weekOverrides.current)
                 ? rawBooking.weekOverrides.current

@@ -24,7 +24,6 @@ const DEFAULT_CONFIG = {
     },
     booking: {
         openWeekdays: [0, 1, 2, 3, 4, 5, 6], // все дни; 0 = воскресенье ... 6 = суббота
-        allowFutureWeeks: true,
         weekOverrides: { current: null, next: null },
         dateOverrides: {},
     },
@@ -153,7 +152,6 @@ function isValidConfig(data) {
 
     if (!booking || typeof booking !== 'object') return false;
     if (!isWeekdayArray(booking.openWeekdays)) return false;
-    if (typeof booking.allowFutureWeeks !== 'boolean') return false;
 
     const { weekOverrides, dateOverrides } = booking;
     if (!weekOverrides || typeof weekOverrides !== 'object') return false;

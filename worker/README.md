@@ -2,10 +2,9 @@
 
 Отдельный Cloudflare Worker для страницы `/admin`. Хранит в KV ссылки
 хедера/футера, расписание бронирования (повторяющиеся открытые дни недели,
-переключатель будущих недель, переопределения для текущей/следующей недели
-и исключения по конкретным датам) и хеш пароля администратора. Специально
-сделан отдельным воркером от `komnata1908-telegram`, чтобы баг здесь не мог
-сломать приём заявок.
+переопределения для текущей/следующей недели и исключения по конкретным
+датам) и хеш пароля администратора. Специально сделан отдельным воркером
+от `komnata1908-telegram`, чтобы баг здесь не мог сломать приём заявок.
 
 ## Деплой (один раз)
 
@@ -32,7 +31,7 @@ wrangler deploy
 ## Эндпоинты
 
 - `GET /config` — публичный, отдаёт `{ links, booking }`, где
-  `booking = { openWeekdays, allowFutureWeeks, weekOverrides: { current, next }, dateOverrides }`
+  `booking = { openWeekdays, weekOverrides: { current, next }, dateOverrides }`
   (дни недели — числа 0-6, 0 = воскресенье; `dateOverrides` — словарь `"YYYY-MM-DD": true|false`).
 - `POST /login` — `{ password }` → `{ token, expiresIn }`.
 - `POST /config` — требует `Authorization: Bearer <token>`, сохраняет новый конфиг.

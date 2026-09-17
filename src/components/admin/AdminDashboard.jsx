@@ -3,7 +3,6 @@ import { useSiteConfig } from '../../context/SiteConfigContext';
 import { saveConfig } from '../../utils/adminApi';
 import LinksEditor from './LinksEditor';
 import WeekdaysEditor from './WeekdaysEditor';
-import FutureWeeksToggle from './FutureWeeksToggle';
 import WeekOverrideEditor from './WeekOverrideEditor';
 import DateExceptionsEditor from './DateExceptionsEditor';
 import PasswordEditor from './PasswordEditor';
@@ -31,7 +30,7 @@ export default function AdminDashboard({ token, onLogout }) {
             })
             .catch((err) => {
                 if (err.message === 'unauthorized') return onLogout();
-                setStatus('Не удалось сохранить');
+                setStatus(`Не удалось сохранить (${err.message})`);
             })
             .finally(() => setSaving(false));
     };
@@ -50,11 +49,6 @@ export default function AdminDashboard({ token, onLogout }) {
             <LinksEditor links={draft.links} onChange={(links) => setDraft((prev) => ({ ...prev, links }))} />
 
             <WeekdaysEditor openWeekdays={draft.booking.openWeekdays} onChange={(openWeekdays) => updateBooking({ openWeekdays })} />
-
-            <FutureWeeksToggle
-                allowFutureWeeks={draft.booking.allowFutureWeeks}
-                onChange={(allowFutureWeeks) => updateBooking({ allowFutureWeeks })}
-            />
 
             <WeekOverrideEditor
                 label="Эта неделя"
