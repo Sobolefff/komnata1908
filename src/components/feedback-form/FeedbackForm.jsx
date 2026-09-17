@@ -10,11 +10,13 @@ import clockPath from '../../images/icons/clock.png';
 import userPath from '../../images/icons/user.png';
 import { data } from '../../utils/times';
 import { Utm } from 'utm-extractor';
+import { reachGoal } from '../../utils/analytics';
 
 export default function FeedbackForm() {
     const url = document.location.href.split('#')[0];
     const utm = new Utm(url);
     const utmValues = utm.get();
+    const refDate = useRef();
     const refTime = useRef();
     const refGuests = useRef();
     const timesArr = data.filter((el) => el.type === 'time');
@@ -23,24 +25,46 @@ export default function FeedbackForm() {
     const guests = Array.from(guestsArr);
     const navigate = useNavigate();
 
-    const getToWeekend = () => {
-        let weekend = Number(moment().format('d'));
-        let sum = 0;
-        if (weekend < 5) {
-            sum = 4 - weekend; // для открытия четверга - 4, для пт и сб - 5
-            return (weekend = moment().add(sum, 'd').format('YYYY-MM-DD'));
-        } else return (weekend = moment().format('YYYY-MM-DD'));
+    // Бронь принимаем только на ближайший блок четверг-пятница-суббота:
+    // если сегодня раньше четверга — берём четверг текущей недели,
+    // если сегодня уже чт/пт/сб — можно выбрать любой день от сегодня до субботы.
+    const getBookingWindow = () => {
+        const today = moment().startOf('day');
+        const thursday = moment().day(4).startOf('day');
+        const saturday = moment().day(6).startOf('day');
+        const min = moment.max(today, thursday);
+        return { min, max: saturday };
     };
+    const getAvailableDates = () => {
+        const { min, max } = getBookingWindow();
+        const dates = [];
+        const cursor = min.clone();
+        while (cursor.isSameOrBefore(max)) {
+            dates.push(cursor.clone());
+            cursor.add(1, 'day');
+        }
+        return dates;
+    };
+    const getCalendarDays = () => {
+        const { min } = getBookingWindow();
+        const gridStart = min.clone().startOf('month').startOf('isoWeek');
+        const gridEnd = min.clone().endOf('month').endOf('isoWeek');
+        const days = [];
+        const cursor = gridStart.clone();
+        while (cursor.isSameOrBefore(gridEnd)) {
+            days.push(cursor.clone());
+            cursor.add(1, 'day');
+        }
+        return days;
+    };
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
     const [options, setOptions] = useState({
-        date: getToWeekend(),
+        date: getAvailableDates()[0].format('YYYY-MM-DD'),
         time: '20:00',
         guests: '1',
     });
 
-    const [maxInterval, setMaxInterval] = useState(
-        moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD')
-    );
     const [name, setName] = useState('');
     const [tel, setTel] = useState('');
     const [nameDirty, setNameDirty] = useState(false);
@@ -48,85 +72,28 @@ export default function FeedbackForm() {
     const [nameError, setNameError] = useState('Заполните имя');
     const [telError, setTelError] = useState('Заполните телефон');
     const [formValid, setFormValid] = useState(false);
-    const [dateError, setDateError] = useState('');
     const [buttonText, setButtonText] = useState('Оставить заявку');
+    const [submitError, setSubmitError] = useState('');
+    const [showDropDownDate, setShowDropDownDate] = useState(false);
     const [showDropDown, setShowDropDown] = useState(false);
     const [showDropDownGuests, setShowDropDownGuests] = useState(false);
 
     useEffect(() => {
-        nameError || telError || dateError
-            ? setFormValid(false)
-            : setFormValid(true);
+        nameError || telError ? setFormValid(false) : setFormValid(true);
         if (!nameError && !telError) {
-            window.ym(90093500, 'reachGoal', 'name-tel');
+            reachGoal('name-tel');
         }
-    }, [nameError, telError, dateError]);
+    }, [nameError, telError]);
 
-    const closeDayHandler = () => {
-        const dayOfWeek = moment(options.date);
-        // чт/пт/сб или пт/сб
-        setMaxInterval(
-            dayOfWeek.format('dddd') === 'суббота'
-                ? dayOfWeek.format('YYYY-MM-DD')
-                : dayOfWeek.format('dddd') === 'четверг'
-                ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-                : dayOfWeek.format('dddd') === 'пятница'
-                ? moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-                : moment(getToWeekend()).add(1, 'd').format('YYYY-MM-DD')
-        );
-        // setMaxInterval(
-        //     dayOfWeek.format('dddd') === 'воскресение'
-        //         ? dayOfWeek.format('YYYY-MM-DD')
-        //         : moment(getToWeekend()).add(2, 'd').format('YYYY-MM-DD')
-        // );
-        if (options.date === '2022-09-09') {
-            setDateError('К сожалению, все места заняты');
-        } else if (
-            dayOfWeek.format('X') < moment(getToWeekend()).format('X') ||
-            dayOfWeek.format('X') >
-                moment(getToWeekend()).add(2, 'd').format('X') ||
-            (moment().format('dddd') === 'воскресение' &&
-                dayOfWeek.format('X') > moment(getToWeekend()).format('X'))
-        ) {
-            setDateError(
-                'Принимаем бронь только на ближайшую пятницу, субботу и воскресение'
-            );
-        } else setDateError('');
-        console.log(dayOfWeek.format('X'))
-    };
-    useEffect(() => {
-        closeDayHandler();
-    }, [options.date]);
-
-    const handlerDate = (e) => {
-        setOptions({ ...options, date: e.target.value });
-    };
     const handlerFormSubmit = (e) => {
         e.preventDefault();
         setFormValid(false);
+        setSubmitError('');
         setButtonText('Отправка...');
 
-        const TOKEN = '5418369687:AAHCMy9pCFT7S1-BDWexPZZW1YS11CPd1I8';
-        const CHAT_ID = '-1001736786651';
-        const URL_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+        const PROXY_API =
+            'https://komnata1908-telegram.petr-sobolew.workers.dev';
 
-        let message = `<b><i>Заявка с сайта:</i></b>\n\n`;
-        message += `<i>Основная информация:</i>\n`;
-        message += `Отправитель: <b>${name}</b>\n`;
-        message += `Телефон: <b>${tel}</b>\n`;
-        message += `Желаемая дата: <b>${moment(options.date).format(
-            'ddd DD.MM.YYYY'
-        )}</b>\n`;
-        message += `Желаемое время: <b>${options.time}</b>\n`;
-        message += `Количество гостей: <b>${options.guests}</b>\n\n`;
-        if (new URL(url).search) {
-            message += `<i>Дополнительная информация:</i>\n`;
-            message += `UTM source: <b>${utmValues.utm_source}</b>\n`;
-            message += `UTM medium: <b>${utmValues.utm_medium}</b>\n`;
-            message += `UTM campaign: <b>${utmValues.utm_campaign}</b>\n`;
-            message += `UTM content: <b>${utmValues.utm_content}</b>\n`;
-            message += `UTM term: <b>${utmValues.utm_term}</b>\n`;
-        }
         const sheetUrl =
             'https://script.google.com/macros/s/AKfycbzZVbb4WWi1NBKlRopRsIZMpt3cE51wnPz6B_RmdZRON2dK63imOeVSZH6eGFoK8u7D/exec';
         const sheetApi = () => {
@@ -137,11 +104,13 @@ export default function FeedbackForm() {
         };
         sheetApi();
         axios
-            .post(URL_API, {
-                chat_id: CHAT_ID,
-                parse_mode: 'html',
-                text: message,
-                disable_notification: false,
+            .post(PROXY_API, {
+                name,
+                tel,
+                date: moment(options.date).format('ddd DD.MM.YYYY'),
+                time: options.time,
+                guests: options.guests,
+                utm: new URL(url).search ? utmValues : undefined,
             })
             .then((res) => {
                 navigate('/thanks');
@@ -149,14 +118,18 @@ export default function FeedbackForm() {
             })
             .catch((err) => {
                 console.warn(err);
+                setButtonText('Оставить заявку');
+                setFormValid(true);
+                setSubmitError(
+                    'Не удалось отправить заявку. Попробуйте ещё раз или напишите нам в Telegram/WhatsApp.'
+                );
             })
             .finally(() => {
-                window.ym(90093500, 'reachGoal', 'form-submit');
-                console.log('Success');
+                reachGoal('form-submit');
             });
 
         setOptions({
-            date: getToWeekend(),
+            date: getAvailableDates()[0].format('YYYY-MM-DD'),
             time: '20:00',
             guests: '1',
         });
@@ -196,7 +169,7 @@ export default function FeedbackForm() {
 
     const telHandler = (e) => {
         setTel(e.target.value);
-        const re = /^((8|\+7)[\-]?)?(\(?\d{3}\)?[\-]?)?[\d\-]{7,10}$/;
+        const re = /^((8|\+7)[-]?)?(\(?\d{3}\)?[-]?)?[\d-]{7,10}$/;
         if (!re.test(String(e.target.value))) {
             setTelError('Введите корректный номер телефона');
         } else {
@@ -204,6 +177,10 @@ export default function FeedbackForm() {
         }
     };
 
+    const dropDownDateHandler = (e) => {
+        e.preventDefault();
+        setShowDropDownDate(!showDropDownDate);
+    };
     const dropDownHandler = (e) => {
         e.preventDefault();
         setShowDropDown(!showDropDown);
@@ -213,6 +190,9 @@ export default function FeedbackForm() {
         setShowDropDownGuests(!showDropDownGuests);
     };
 
+    const dateHandler = (e) => {
+        setOptions({ ...options, date: e.target.dataset.value });
+    };
     const timeHandler = (e) => {
         setOptions({ ...options, time: e.target.dataset.value });
     };
@@ -236,6 +216,7 @@ export default function FeedbackForm() {
             };
         }, [ref, handler]);
     }
+    useOnClickOutside(refDate, (e) => setShowDropDownDate(false));
     useOnClickOutside(refTime, (e) => setShowDropDown(false));
     useOnClickOutside(refGuests, (e) => setShowDropDownGuests(false));
     return (
@@ -286,20 +267,85 @@ export default function FeedbackForm() {
                             src={calendarPath}
                             alt="иконка календаря"
                         />
-                        <input
-                            min={getToWeekend()}
-                            max={maxInterval}
-                            type="date"
-                            name="Data"
-                            value={options.date}
-                            onChange={(e) => handlerDate(e)}
-                            className={styles.optionsInput}
-                        />
-                        {dateError && (
-                            <span className={styles.errorDate}>
-                                {dateError}
-                            </span>
-                        )}
+                        <div className={styles.dropDown} ref={refDate}>
+                            <button
+                                type="button"
+                                onClick={dropDownDateHandler}
+                                className={styles.dropDownButton}
+                            >
+                                {capitalize(
+                                    moment(options.date).format('dddd, DD.MM')
+                                )}
+                            </button>
+                            {showDropDownDate && (
+                                <div className={styles.calendar}>
+                                    <div className={styles.calendarHeader}>
+                                        {capitalize(
+                                            getBookingWindow().min.format(
+                                                'MMMM YYYY'
+                                            )
+                                        )}
+                                    </div>
+                                    <div className={styles.calendarWeekdays}>
+                                        {[
+                                            'Пн',
+                                            'Вт',
+                                            'Ср',
+                                            'Чт',
+                                            'Пт',
+                                            'Сб',
+                                            'Вс',
+                                        ].map((d) => (
+                                            <span key={d}>{d}</span>
+                                        ))}
+                                    </div>
+                                    <div className={styles.calendarGrid}>
+                                        {getCalendarDays().map((day) => {
+                                            const dateStr =
+                                                day.format('YYYY-MM-DD');
+                                            const isAvailable =
+                                                getAvailableDates().some(
+                                                    (d) =>
+                                                        d.isSame(day, 'day')
+                                                );
+                                            const isCurrentMonth =
+                                                day.month() ===
+                                                getBookingWindow().min.month();
+                                            return (
+                                                <button
+                                                    type="button"
+                                                    key={dateStr}
+                                                    disabled={!isAvailable}
+                                                    data-value={dateStr}
+                                                    onClick={(e) =>
+                                                        dateHandler(e)
+                                                    }
+                                                    className={[
+                                                        styles.calendarDay,
+                                                        options.date ===
+                                                            dateStr &&
+                                                            styles.calendarDaySelected,
+                                                        !isCurrentMonth &&
+                                                            styles.calendarDayMuted,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' ')}
+                                                >
+                                                    {day.date()}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            <input
+                                type="text"
+                                name="Data"
+                                value={options.date}
+                                readOnly
+                                className={styles.hiddenInput}
+                            />
+                        </div>
                     </label>
                     <label className={styles.inputLabel}>
                         <img
@@ -390,15 +436,16 @@ export default function FeedbackForm() {
                 <fieldset className={styles.submitContainer}>
                     <button
                         disabled={!formValid}
-                        onClick={() =>
-                            window.ym(90093500, 'reachGoal', 'submit-click')
-                        }
+                        onClick={() => reachGoal('submit-click')}
                         id="form-submit"
                         type="submit"
                         className={styles.submitButton}
                     >
                         {buttonText}
                     </button>
+                    {submitError && (
+                        <span className={styles.error}>{submitError}</span>
+                    )}
                 </fieldset>
             </form>
         </Feedback>

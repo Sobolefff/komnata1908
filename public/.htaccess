@@ -1,0 +1,16 @@
+# index.html must always be re-fetched so browsers pick up new
+# hashed asset filenames (main.<hash>.js/css) right after each deploy.
+<IfModule mod_headers.c>
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+
+    # Hashed build assets are safe to cache forever: any code change
+    # produces a new filename, so a cached old file is never served
+    # for new content.
+    <FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ico)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
