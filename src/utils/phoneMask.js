@@ -30,3 +30,6 @@ export const formatPhone = (rawValue) => {
 
 // Позиция каретки в отформатированной строке сразу после N-й введённой цифры.
 export const CARET_POSITION_AFTER_DIGITS = [0, 5, 6, 8, 10, 11, 12, 14, 15, 17, 19];
+
+// Телефон без маски, для отправки в Telegram: "+7" + 10 цифр.
+export const toPlainPhone = (value) => `+7${getPhoneDigits(value)}`;

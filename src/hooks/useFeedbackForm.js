@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Utm } from 'utm-extractor';
 import { reachGoal } from '../utils/analytics';
 import { submitBooking, submitToSheet } from '../utils/bookingApi';
+import { toPlainPhone } from '../utils/phoneMask';
 import { validateName } from '../utils/validators';
 import { useBookingOptions } from './useBookingOptions';
 import { usePhoneField } from './usePhoneField';
@@ -41,7 +42,7 @@ export function useFeedbackForm() {
         submitToSheet(e.target);
         submitBooking({
             name: name.value,
-            tel: tel.value,
+            tel: toPlainPhone(tel.value),
             date: bookingOptions.options.date,
             time: bookingOptions.options.time,
             guests: bookingOptions.options.guests,
