@@ -59,3 +59,5 @@ export const getCalendarDays = (monthAnchor) => {
 };
 
 export const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+export const shortWeekdayLabel = (day) => WEEKDAY_LABELS[WEEKDAY_VALUES.indexOf(day)];
