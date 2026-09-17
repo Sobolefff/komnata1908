@@ -13,11 +13,11 @@ export const DEFAULT_BOOKING_CONFIG = {
 
 const MAX_SEARCH_DAYS = 730; // safety cap so "infinite weeks ahead" can't loop forever
 
-// Понедельный цикл воскресенье-суббота, используемый как единица отсчёта для
-// "текущая неделя" / "следующая неделя" — тот же, что раньше был жёстко
-// зашит для окна чт-пт-сб.
+// Недельный цикл понедельник-воскресенье (isoWeek — не зависит от локали),
+// используемый как единица отсчёта для "текущая неделя" / "следующая
+// неделя" — тот же порядок дней, что в WEEKDAY_LABELS и в сетке календаря.
 function weekIndexOf(date) {
-    const cycleStart = moment().day(0).startOf('day');
+    const cycleStart = moment().startOf('isoWeek');
     return Math.floor(date.diff(cycleStart, 'days') / 7);
 }
 
