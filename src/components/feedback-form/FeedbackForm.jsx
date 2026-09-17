@@ -45,6 +45,18 @@ export default function FeedbackForm() {
         }
         return dates;
     };
+    const getCalendarDays = () => {
+        const { min } = getBookingWindow();
+        const gridStart = min.clone().startOf('month').startOf('isoWeek');
+        const gridEnd = min.clone().endOf('month').endOf('isoWeek');
+        const days = [];
+        const cursor = gridStart.clone();
+        while (cursor.isSameOrBefore(gridEnd)) {
+            days.push(cursor.clone());
+            cursor.add(1, 'day');
+        }
+        return days;
+    };
     const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
     const [options, setOptions] = useState({
@@ -266,22 +278,65 @@ export default function FeedbackForm() {
                                 )}
                             </button>
                             {showDropDownDate && (
-                                <ul className={styles.dropDownList}>
-                                    {getAvailableDates().map((date) => (
-                                        <li
-                                            onClick={(e) => dateHandler(e)}
-                                            className={styles.dropDownItem}
-                                            data-value={date.format(
-                                                'YYYY-MM-DD'
-                                            )}
-                                            key={date.format('YYYY-MM-DD')}
-                                        >
-                                            {capitalize(
-                                                date.format('dddd, DD.MM')
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className={styles.calendar}>
+                                    <div className={styles.calendarHeader}>
+                                        {capitalize(
+                                            getBookingWindow().min.format(
+                                                'MMMM YYYY'
+                                            )
+                                        )}
+                                    </div>
+                                    <div className={styles.calendarWeekdays}>
+                                        {[
+                                            'Пн',
+                                            'Вт',
+                                            'Ср',
+                                            'Чт',
+                                            'Пт',
+                                            'Сб',
+                                            'Вс',
+                                        ].map((d) => (
+                                            <span key={d}>{d}</span>
+                                        ))}
+                                    </div>
+                                    <div className={styles.calendarGrid}>
+                                        {getCalendarDays().map((day) => {
+                                            const dateStr =
+                                                day.format('YYYY-MM-DD');
+                                            const isAvailable =
+                                                getAvailableDates().some(
+                                                    (d) =>
+                                                        d.isSame(day, 'day')
+                                                );
+                                            const isCurrentMonth =
+                                                day.month() ===
+                                                getBookingWindow().min.month();
+                                            return (
+                                                <button
+                                                    type="button"
+                                                    key={dateStr}
+                                                    disabled={!isAvailable}
+                                                    data-value={dateStr}
+                                                    onClick={(e) =>
+                                                        dateHandler(e)
+                                                    }
+                                                    className={[
+                                                        styles.calendarDay,
+                                                        options.date ===
+                                                            dateStr &&
+                                                            styles.calendarDaySelected,
+                                                        !isCurrentMonth &&
+                                                            styles.calendarDayMuted,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' ')}
+                                                >
+                                                    {day.date()}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             )}
                             <input
                                 type="text"
