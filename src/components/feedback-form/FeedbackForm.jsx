@@ -16,6 +16,7 @@ export default function FeedbackForm() {
     const url = document.location.href.split('#')[0];
     const utm = new Utm(url);
     const utmValues = utm.get();
+    const refDate = useRef();
     const refTime = useRef();
     const refGuests = useRef();
     const timesArr = data.filter((el) => el.type === 'time');
@@ -34,16 +35,24 @@ export default function FeedbackForm() {
         const min = moment.max(today, thursday);
         return { min, max: saturday };
     };
-    const getMinDate = () => getBookingWindow().min.format('YYYY-MM-DD');
-    const getMaxDate = () => getBookingWindow().max.format('YYYY-MM-DD');
+    const getAvailableDates = () => {
+        const { min, max } = getBookingWindow();
+        const dates = [];
+        const cursor = min.clone();
+        while (cursor.isSameOrBefore(max)) {
+            dates.push(cursor.clone());
+            cursor.add(1, 'day');
+        }
+        return dates;
+    };
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
     const [options, setOptions] = useState({
-        date: getMinDate(),
+        date: getAvailableDates()[0].format('YYYY-MM-DD'),
         time: '20:00',
         guests: '1',
     });
 
-    const [maxInterval, setMaxInterval] = useState(getMaxDate());
     const [name, setName] = useState('');
     const [tel, setTel] = useState('');
     const [nameDirty, setNameDirty] = useState(false);
@@ -51,39 +60,19 @@ export default function FeedbackForm() {
     const [nameError, setNameError] = useState('Заполните имя');
     const [telError, setTelError] = useState('Заполните телефон');
     const [formValid, setFormValid] = useState(false);
-    const [dateError, setDateError] = useState('');
     const [buttonText, setButtonText] = useState('Оставить заявку');
     const [submitError, setSubmitError] = useState('');
+    const [showDropDownDate, setShowDropDownDate] = useState(false);
     const [showDropDown, setShowDropDown] = useState(false);
     const [showDropDownGuests, setShowDropDownGuests] = useState(false);
 
     useEffect(() => {
-        nameError || telError || dateError
-            ? setFormValid(false)
-            : setFormValid(true);
+        nameError || telError ? setFormValid(false) : setFormValid(true);
         if (!nameError && !telError) {
             reachGoal('name-tel');
         }
-    }, [nameError, telError, dateError]);
+    }, [nameError, telError]);
 
-    const closeDayHandler = () => {
-        const { min, max } = getBookingWindow();
-        setMaxInterval(max.format('YYYY-MM-DD'));
-        const selectedDate = moment(options.date).startOf('day');
-        if (selectedDate.isBefore(min) || selectedDate.isAfter(max)) {
-            setDateError(
-                'Принимаем бронь только на ближайшие четверг, пятницу и субботу'
-            );
-        } else setDateError('');
-    };
-    useEffect(() => {
-        closeDayHandler();
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- closeDayHandler is recreated every render; re-running on identity change would be a no-op loop, not a bug
-    }, [options.date]);
-
-    const handlerDate = (e) => {
-        setOptions({ ...options, date: e.target.value });
-    };
     const handlerFormSubmit = (e) => {
         e.preventDefault();
         setFormValid(false);
@@ -128,7 +117,7 @@ export default function FeedbackForm() {
             });
 
         setOptions({
-            date: getMinDate(),
+            date: getAvailableDates()[0].format('YYYY-MM-DD'),
             time: '20:00',
             guests: '1',
         });
@@ -176,6 +165,10 @@ export default function FeedbackForm() {
         }
     };
 
+    const dropDownDateHandler = (e) => {
+        e.preventDefault();
+        setShowDropDownDate(!showDropDownDate);
+    };
     const dropDownHandler = (e) => {
         e.preventDefault();
         setShowDropDown(!showDropDown);
@@ -185,6 +178,9 @@ export default function FeedbackForm() {
         setShowDropDownGuests(!showDropDownGuests);
     };
 
+    const dateHandler = (e) => {
+        setOptions({ ...options, date: e.target.dataset.value });
+    };
     const timeHandler = (e) => {
         setOptions({ ...options, time: e.target.dataset.value });
     };
@@ -208,6 +204,7 @@ export default function FeedbackForm() {
             };
         }, [ref, handler]);
     }
+    useOnClickOutside(refDate, (e) => setShowDropDownDate(false));
     useOnClickOutside(refTime, (e) => setShowDropDown(false));
     useOnClickOutside(refGuests, (e) => setShowDropDownGuests(false));
     return (
@@ -258,20 +255,42 @@ export default function FeedbackForm() {
                             src={calendarPath}
                             alt="иконка календаря"
                         />
-                        <input
-                            min={getMinDate()}
-                            max={maxInterval}
-                            type="date"
-                            name="Data"
-                            value={options.date}
-                            onChange={(e) => handlerDate(e)}
-                            className={styles.optionsInput}
-                        />
-                        {dateError && (
-                            <span className={styles.errorDate}>
-                                {dateError}
-                            </span>
-                        )}
+                        <div className={styles.dropDown} ref={refDate}>
+                            <button
+                                type="button"
+                                onClick={dropDownDateHandler}
+                                className={styles.dropDownButton}
+                            >
+                                {capitalize(
+                                    moment(options.date).format('dddd, DD.MM')
+                                )}
+                            </button>
+                            {showDropDownDate && (
+                                <ul className={styles.dropDownList}>
+                                    {getAvailableDates().map((date) => (
+                                        <li
+                                            onClick={(e) => dateHandler(e)}
+                                            className={styles.dropDownItem}
+                                            data-value={date.format(
+                                                'YYYY-MM-DD'
+                                            )}
+                                            key={date.format('YYYY-MM-DD')}
+                                        >
+                                            {capitalize(
+                                                date.format('dddd, DD.MM')
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                            <input
+                                type="text"
+                                name="Data"
+                                value={options.date}
+                                readOnly
+                                className={styles.hiddenInput}
+                            />
+                        </div>
                     </label>
                     <label className={styles.inputLabel}>
                         <img
