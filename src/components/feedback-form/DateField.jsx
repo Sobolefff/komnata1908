@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import calendarPath from '../../images/icons/calendar.png';
 import { useDropdown } from '../../hooks/useDropdown';
 import { useSiteConfig } from '../../context/SiteConfigContext';
-import { WEEKDAY_LABELS, capitalize, getCalendarDays, getDefaultBookingDate, isDateBookable } from '../../utils/bookingWindow';
+import { WEEKDAY_LABELS, capitalize, getCalendarDays, getDefaultBookingDate, isDateBookable, shortWeekdayLabel } from '../../utils/bookingWindow';
 import styles from './feedbackForm.module.css';
 
 const YEARS_AHEAD = 2;
@@ -49,7 +49,7 @@ export function DateField({ value, onChange }) {
                     onClick={toggle}
                     className={styles.dropDownButton}
                 >
-                    {value ? capitalize(moment(value).format('dddd, DD.MM')) : 'Выберите дату'}
+                    {value ? `${shortWeekdayLabel(moment(value).day())}, ${moment(value).format('DD.MM')}` : 'Выберите дату'}
                 </button>
                 {isOpen && (
                     <div className={styles.calendar}>
