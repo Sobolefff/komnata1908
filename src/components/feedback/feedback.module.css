@@ -8,7 +8,7 @@
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url(../../images/feedbackbg.jpg);
+    background-image: url(../../images/feedbackbg.webp);
 }
 
 @media (max-width: 1440px) {

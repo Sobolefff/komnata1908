@@ -7,6 +7,19 @@
     width: 100%;
 }
 
+.title {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 130%;
+    text-align: center;
+    color: #F8F8F8;
+    margin: 0 0 30px;
+    padding: 0;
+    max-width: 661px;
+}
+
 .paragraph {
     max-width: 661px;
     font-family: 'Inter';
