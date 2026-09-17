@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Utm } from 'utm-extractor';
 import { reachGoal } from '../utils/analytics';
 import { submitBooking, submitToSheet } from '../utils/bookingApi';
-import { validateName, validateTel } from '../utils/validators';
+import { validateName } from '../utils/validators';
 import { useBookingOptions } from './useBookingOptions';
+import { usePhoneField } from './usePhoneField';
 import { useValidatedField } from './useValidatedField';
 
 const SUBMIT_ERROR_MESSAGE =
@@ -14,7 +15,7 @@ export function useFeedbackForm() {
     const navigate = useNavigate();
     const bookingOptions = useBookingOptions();
     const name = useValidatedField('Заполните имя', validateName);
-    const tel = useValidatedField('Заполните телефон', validateTel);
+    const tel = usePhoneField('Заполните телефон');
 
     const [formValid, setFormValid] = useState(false);
     const [buttonText, setButtonText] = useState('Оставить заявку');

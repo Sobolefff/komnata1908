@@ -21,12 +21,15 @@ export function ContactFields({ name, tel }) {
             </label>
             <label className={styles.textLabel}>
                 <input
+                    ref={tel.inputRef}
                     autoComplete="off"
                     type="tel"
+                    inputMode="tel"
                     name="Tel"
-                    placeholder="Телефон"
+                    placeholder="+7 (___) ___-__-__"
                     value={tel.value}
                     onChange={tel.onChange}
+                    onFocus={tel.onFocus}
                     onBlur={tel.onBlur}
                     className={styles.textInput}
                 />
