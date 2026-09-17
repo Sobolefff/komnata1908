@@ -29,6 +29,7 @@ export function ContactFields({ name, tel }) {
                     placeholder="+7 (___) ___-__-__"
                     value={tel.value}
                     onChange={tel.onChange}
+                    onKeyDown={tel.onKeyDown}
                     onFocus={tel.onFocus}
                     onBlur={tel.onBlur}
                     className={styles.textInput}

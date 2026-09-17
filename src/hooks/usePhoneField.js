@@ -36,6 +36,41 @@ export function usePhoneField(initialError) {
         setError(getPhoneDigits(formatted).length === 10 ? '' : PHONE_ERROR);
     };
 
+    // Backspace/Delete рядом с литералом маски ")", "-", " " по умолчанию
+    // стирает сам литерал, а не цифру — formatPhone тут же восстанавливает
+    // его обратно, и кажется, что нажатие вообще ни на что не повлияло.
+    // Здесь ищем ближайшую цифру в нужную сторону и удаляем её саму.
+    const removeDigitAndReformat = (digitIndex, digitsBeforeAnchor) => {
+        const rawWithoutDigit = value.slice(0, digitIndex) + value.slice(digitIndex + 1);
+        const digitCount = getPhoneDigits(value.slice(0, digitsBeforeAnchor)).length;
+        const formatted = formatPhone(rawWithoutDigit);
+
+        pendingCaret.current =
+            digitCount === 0 ? formatted.length : CARET_POSITION_AFTER_DIGITS[digitCount];
+        setValue(formatted);
+        setError(getPhoneDigits(formatted).length === 10 ? '' : PHONE_ERROR);
+    };
+
+    const onKeyDown = (e) => {
+        const el = e.target;
+        if (el.selectionStart !== el.selectionEnd) return;
+        const caret = el.selectionStart;
+
+        if (e.key === 'Backspace' && caret > 0 && !/\d/.test(value[caret - 1])) {
+            let digitIndex = caret - 1;
+            while (digitIndex >= 0 && !/\d/.test(value[digitIndex])) digitIndex -= 1;
+            if (digitIndex < 0) return;
+            e.preventDefault();
+            removeDigitAndReformat(digitIndex, digitIndex);
+        } else if (e.key === 'Delete' && caret < value.length && !/\d/.test(value[caret])) {
+            let digitIndex = caret;
+            while (digitIndex < value.length && !/\d/.test(value[digitIndex])) digitIndex += 1;
+            if (digitIndex >= value.length) return;
+            e.preventDefault();
+            removeDigitAndReformat(digitIndex, caret);
+        }
+    };
+
     const onFocus = () => {
         if (!value) {
             pendingCaret.current = 4;
@@ -50,5 +85,5 @@ export function usePhoneField(initialError) {
         }
     };
 
-    return { value, dirty, error, inputRef, onChange, onFocus, onBlur };
+    return { value, dirty, error, inputRef, onChange, onKeyDown, onFocus, onBlur };
 }
