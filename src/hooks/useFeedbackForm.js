@@ -49,6 +49,7 @@ export function useFeedbackForm() {
             utm: new URL(url).search ? utmValues : undefined,
         })
             .then(() => {
+                reachGoal('form-submit');
                 navigate('/thanks');
                 setButtonText('Оставить заявку');
             })
@@ -57,9 +58,6 @@ export function useFeedbackForm() {
                 setButtonText('Оставить заявку');
                 setFormValid(true);
                 setSubmitError(SUBMIT_ERROR_MESSAGE);
-            })
-            .finally(() => {
-                reachGoal('form-submit');
             });
 
         bookingOptions.reset();
